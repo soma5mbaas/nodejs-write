@@ -1,0 +1,22 @@
+{
+    "port": 8000,
+    "database": {
+        "buckets": [
+            {
+                "bucket": "token",
+                "host": "localhost:8091"
+            }
+        ]
+    },
+    "mqueue": {
+    	"write_mqueue": {
+    		"host": "localhost",
+	    	"port": 5672,
+	    	"login": "guest",
+	    	"password": "guest",
+	    	"connectionTimeout": 0,
+            "reconnect": true
+    	}
+    }
+}
+	
