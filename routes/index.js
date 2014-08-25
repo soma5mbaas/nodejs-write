@@ -2,8 +2,24 @@ var express = require('express');
 var router = express.Router();
 
 
-router.get('/', function(req, res) {
+// POST 
+router.post('/', function(req, res) {
 	res.json({});
 });
+
+// PUT
+
+// GET
+router.get('/health', function(req, res) {
+	res.json({
+		pid: process.pid,
+		memory: process.memoryUsage(),
+		uptime: process.uptime()
+	});
+});
+
+// DELTE
+
+
 
 module.exports = router;
