@@ -9,12 +9,9 @@ var checkToken = require('./utils/token').checkToken;
 
 var app = express();
 
-process.env.TZ = 'Asia/Seoul';
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 
-routes.use( checkToken );
 app.use('/', routes);
 
 object.use( checkToken );
