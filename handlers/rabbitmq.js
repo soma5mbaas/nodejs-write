@@ -1,5 +1,5 @@
 var amqp       = require('amqp');
-var writeQueue = require('../config').mqueue.write_mqueue;
+var writeQueue = config.mqueue.write_mqueue;
 
 
 function RabbitMQ() {
@@ -18,7 +18,6 @@ RabbitMQ.prototype.connect = function( callback ) {
 	self.connection.on('close', function() {
 		console.log('RabbitMQ Closed');
 	});
-
 };
 
 RabbitMQ.prototype.publish = function( q, msg ) {
