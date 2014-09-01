@@ -5,16 +5,17 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var object = require('./routes/object');
 
-var checkToken = require('./utils/token').checkToken;
+var token = require('./utils/token');
 
 var app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
+app.use(token.checkToken());
+
+
 
 app.use('/', routes);
-
-object.use( checkToken );
 app.use('/classes', object);
 
 
