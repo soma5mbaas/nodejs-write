@@ -17,6 +17,38 @@
 	    	"connectionTimeout": 0,
             "reconnect": true
     	}
+    },
+    "logger": {
+        "console": {
+            "level": "warn"
+        },
+        "file": {
+            "level": "warn",
+            "filename": "defalut.log",
+            "json": false
+        },
+        "db": {
+
+        },
+        "config": {
+            "levels": {
+                "verbose": 0,
+                "error": 1,
+                "warn": 2,
+                "info": 3,
+                "debug": 4,
+                "file": 5
+            },
+            "colors": {
+                "verbose": "blue",
+                "error": "red",
+                "warn": "yellow",
+                "info": "green",
+                "debug": "green",
+                "file": "white"
+            },
+            "exitOnError": false
+        }   
     }
 }
 	

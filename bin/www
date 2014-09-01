@@ -2,17 +2,27 @@
 var debug = require('debug')('service');
 var cluster = require('cluster');
 
+var Logger  = require('../utils/logger');
+
 // Time Zone
 process.env.TZ = 'Asia/Seoul';
 
 // Exception
-process.on('uncaughtException', function(error) {
-	console.log(error);
-});
+// process.on('uncaughtException', function(error) {
+// 	console.log(error);
+// });
 
 // Global Config
 global.config = require('../config');
 
+// Global Error Code
+global.errorCode = require('../errorCode');
+
+// set logger
+global.log  = new Logger('../logs/debug.log');
+global.loge = new Logger('../logs/exception.log');
+
+log.file('test');
 
 if( cluster.isMaster ) {
 	var processCount = require('os').cpus().length - 2;
@@ -28,6 +38,8 @@ if( cluster.isMaster ) {
 } else {
 	var app = require('../app');
 	var rabbitmq = require('../handlers/rabbitmq');
+
+	
 
 	rabbitmq.connect(function() {
 		app.set('port', process.env.PORT || config.port);
