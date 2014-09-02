@@ -1,7 +1,7 @@
-var tokenBucket = require('../database/couchbase').get('token');
+var tokenBucket = require('../connectors/couchbase').get('token');
 var async = require('async');
 var url = require('url');
-
+var sendError = require('./util').sendError;
 
 exports.checkToken = function(){
 	return function( req, res, next ) {
@@ -30,7 +30,7 @@ exports.checkToken = function(){
 				});
 			}
 			], function(error, results) {
-				if( error.code === 13 ) { 
+				if( error && error.code === 13 ) { 
 					// The key does not exist on the server
 					return sendError( res, errorCode.INVALID_USER_TOKEN );
 				} else {
@@ -45,14 +45,9 @@ function isNotNeedToBeChecked(path) {
 		'/health'
 	];
 
-
 	for( var i = 0; i < paths.length; i++ ) {
 		if( path.substr(0, paths[i].length) == paths[i] ) return true;
 	}
 
 	return false;
-};
-
-function sendError( res, err ) {
-	res.status( err.status ).json( err.info );
 };

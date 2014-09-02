@@ -24,3 +24,7 @@ exports.getHeader = function( req ) {
 
 	return header;
 };
+
+exports.sendError = function(res, errorCode) {
+	res.status( errorCode.status ).json( errorCode.info );
+};

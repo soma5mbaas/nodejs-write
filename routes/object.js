@@ -9,7 +9,7 @@ router.post( '/:classname', object.create );
 router.put( '/:classname/:objectid', object.update );
 
 // /classes/<className>/<objectId>		DELETE	Deleting Objects
-router.delete( '/:classname/:objectid', object.delete );
+router.delete( '/:classname/:objectid', object._delete );
 
 
 

@@ -1,9 +1,13 @@
 var util = require('../utils/util');
 var token = require('../utils/token');
-var rabbitmq = require('../handlers/rabbitmq');
+// var rabbitmq = require('../handlers/rabbitmq');
+var objectHandler = require('../handlers/object');
+var schemaHandler = require('../handlers/schema');
+var sendError = require('../utils/util').sendError;
+var uuid = require('uuid');
 
 // /classes/<className>					POST	Creating Objects
-exports.create = function create(req, res) {
+exports.create = function (req, res) {
 	// Header
 	var input = util.getHeader(req);
 	var output = {};
@@ -11,15 +15,27 @@ exports.create = function create(req, res) {
 	// Body
 	input.class = req.params.classname;
 	input.method = 'create';
+	// Object
 	input.object = req.body;
+	input.object.objectId = uuid();
+	input.object.createAt = new Date();
+	input.object.updateAt = new Date();
 
 
-	rabbitmq.publish( 'write', input );
-	res.json( output );
+	objectHandler.createObject( input, function(error, result) {
+		if(error) {
+			// send errorCode
+			return sendError(res, errorCode.OTHER_CAUSE);
+		} else {
+			// send result
+			res.json(input);
+			schemaHandler.createSchema(input);
+		}
+	});
 };
 
 // /classes/<className>/<objectId>		PUT	Updating Objects
-exports.update = function update(req, res) {
+exports.update = function (req, res) {
 	// Header
 	var input = util.getHeader(req);
 	var output = {};
@@ -27,19 +43,27 @@ exports.update = function update(req, res) {
 	// Body
 	input.class = req.params.classname;
 	input.method = 'update';
-	input.object = req.body;
-	input.object.object_id = req.params.objectid;
-	
-	output.update_at = new Date();
 
-	rabbitmq.publish(  'write', input );
-	res.json( output );
+	// Object
+	input.object = req.body;
+	input.object.objectId = req.params.objectid;
+	input.object.updateAt = new Date();
+
+	objectHandler.updateObject( input, function(error, result) {
+		if(error) {
+			// send errorCode
+			return sendError(res, errorCode.OTHER_CAUSE);
+		} else {
+			// send result
+			res.json(input);
+			schemaHandler.updateSchema(input);
+		}
+	});
 	
 };
 
 // /classes/<className>/<objectId>		DELETE	Deleting Objects
-exports.delete = function remove(req, res) {
-	res.json({name: 'remove'});
+exports._delete = function (req, res) {
 	// Header
 	var input = util.getHeader(req);
 	var output = {};
@@ -47,10 +71,18 @@ exports.delete = function remove(req, res) {
 	// Body
 	input.class = req.params.classname;
 	input.method = 'delete';
-	input.object = { object_id: req.params.objectid };
+
+	input.object = { objectId: req.params.objectid };
 
 
-	rabbitmq.publish(  'write', input );
-	res.json( output );
+	objectHandler.deleteObject( input, function(error, result) {
+		if(error) {
+			// send errorCode
+			return sendError(res, errorCode.OTHER_CAUSE);
+		} else {
+			// send result
+			res.json(input);
+		}
+	});
 	
 };

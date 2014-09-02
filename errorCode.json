@@ -46,7 +46,13 @@
 	,"OBJECT_NOT_FOUND":    101
 	,"OBJECT_TOO_LARGE":    116
 	,"OPERATION_FORBIDDEN": 119
-	,"OTHER_CAUSE": -1
+	,"OTHER_CAUSE": {
+		"status": 500,
+		"info": {
+			"code": -1,
+			"error": "OTHER_CAUSE"
+		}
+	}
 	,"PASSWORD_MISSING":    201
 	,"PUSH_MISCONFIGURED":  115
 	,"SCRIPT_ERROR":    141

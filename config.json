@@ -9,23 +9,35 @@
         ]
     },
     "mqueue": {
-    	"write_mqueue": {
+    	"write": {
+            "url": "amqp://admin:admin@stage.haru.io:5672",
     		"host": "localhost",
 	    	"port": 5672,
 	    	"login": "guest",
 	    	"password": "guest",
 	    	"connectionTimeout": 0,
             "reconnect": true
-    	}
+    	},
+        "schema": {
+            "url": "amqp://admin:admin@stage.haru.io:5672",
+            "host": "localhost",
+            "port": 5672,
+            "login": "guest",
+            "password": "guest",
+            "connectionTimeout": 0,
+            "reconnect": true
+        }
     },
     "logger": {
         "console": {
-            "level": "warn"
+            "level": "file",
+            "colorize": true
         },
         "file": {
-            "level": "warn",
+            "level": "file",
             "filename": "defalut.log",
-            "json": false
+            "json": false,
+            "colorize": false
         },
         "db": {
 

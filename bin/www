@@ -7,11 +7,6 @@ var Logger  = require('../utils/logger');
 // Time Zone
 process.env.TZ = 'Asia/Seoul';
 
-// Exception
-// process.on('uncaughtException', function(error) {
-// 	console.log(error);
-// });
-
 // Global Config
 global.config = require('../config');
 
@@ -19,16 +14,19 @@ global.config = require('../config');
 global.errorCode = require('../errorCode');
 
 // set logger
-global.log  = new Logger('../logs/debug.log');
-global.loge = new Logger('../logs/exception.log');
+global.log  = new Logger( __dirname +'/../logs/debug.log');
+global.loge = new Logger( __dirname +'/../logs/exception.log');
 
-log.file('test');
+// Exception
+process.on('uncaughtException', function(error) {
+	loge.error(error);
+});
 
 if( cluster.isMaster ) {
 	var processCount = require('os').cpus().length - 2;
 
 	cluster.on('exit',function(worker) {
-		console.log( '['+worker.id+'] worker'  + " is exit");
+		log.info('[%d] worker is exit', worker.process.pid);
 	});
 	
 	for( var i = 0; i < processCount; i++ ) {
@@ -37,15 +35,10 @@ if( cluster.isMaster ) {
 
 } else {
 	var app = require('../app');
-	var rabbitmq = require('../handlers/rabbitmq');
 
-	
-
-	rabbitmq.connect(function() {
-		app.set('port', process.env.PORT || config.port);
-
-		var server = app.listen(app.get('port'), function() {
-			  debug('Express server listening on port ' + server.address().port);
-		});
+	app.set('port', process.env.PORT || config.port);
+	var server = app.listen(app.get('port'), function() {
+		log.info('[%d] Express server listening on port %d', process.pid, server.address().port);
 	});
+
 }
