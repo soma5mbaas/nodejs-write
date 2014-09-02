@@ -4,20 +4,18 @@ var keys = require('../utils/keys');
 exports.createSchema = function(input) {
 	var json = {
 		schema: Object.keys(input.object),
-		application_id: input.application_id,
+		applicationId: input.applicationId,
 		class: input.class,
 		method: 'create'
 	};
 
-
 	rabbitmq.publish('schema', json);
-
 };
 
 exports.updateSchema = function(input) {
 	var json = {
 		schema: Object.keys(input.object),
-		application_id: input.application_id,
+		applicationId: input.applicationId,
 		class: input.class,
 		method: 'update'
 	};
