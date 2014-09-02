@@ -12,7 +12,7 @@ function DB() {
 			if(err) {
 				console.log(err);
 			} else {
-				console.log( BUCKET.bucket + ' Couchbase Connected');
+				log.info('[%d] Couchbase Connected', process.pid);
 			}
 		});
 	});
