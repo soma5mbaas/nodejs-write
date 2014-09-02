@@ -30,11 +30,11 @@
     },
     "logger": {
         "console": {
-            "level": "file",
+            "level": "verbose",
             "colorize": true
         },
         "file": {
-            "level": "file",
+            "level": "verbose",
             "filename": "defalut.log",
             "json": false,
             "colorize": false

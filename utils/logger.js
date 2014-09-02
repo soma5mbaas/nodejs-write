@@ -10,8 +10,8 @@ module.exports = function( logFilename ) {
 	var logger = new winston.Logger({
 		levels: loggerConfig.levels,
 		transports:[ 
-			new winston.transports.Console(consoleConfig),
-			new winston.transports.File(fileConfig)
+			new winston.transports.Console(consoleConfig)
+			// new winston.transports.File(fileConfig)
 		],
 		exitOnError: loggerConfig.exitOnError
 	});
