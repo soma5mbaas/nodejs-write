@@ -18,8 +18,8 @@ function getAPIInfo( req ) {
 
 exports.getHeader = function( req ) {
 	var header = {};
-	header.application_id = req.get('Application-Id');
-	header.user_id = req.get('User-Id');
+	header.applicationId = req.get('Application-Id');
+	header.userId = req.get('User-Id');
 	header.api = getAPIInfo( req );
 
 	return header;
