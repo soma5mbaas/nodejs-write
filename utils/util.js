@@ -19,7 +19,6 @@ function getAPIInfo( req ) {
 exports.getHeader = function( req ) {
 	var header = {};
 	header.applicationId = req.get('Application-Id');
-	header.userId = req.get('User-Id');
 	header.api = getAPIInfo( req );
 
 	return header;
