@@ -1,6 +1,7 @@
 var amqp = require('amqplib/callback_api');
 var queues = require('../config').mqueue;
 var uuid = require('uuid');
+var async = require('async');
 
 
 function RabbitMQ() {
@@ -35,25 +36,47 @@ RabbitMQ.prototype.connect = function() {
 
 };	
 
-RabbitMQ.prototype.publish = function(qname, data) {
-	var conn = this.connection[qname];
+RabbitMQ.prototype.publish = function(qname, data, callback) {
+	var self = this;
 
-	if(conn === null || conn === undefined){
-		log.error('[%d] rabbitmq %s connection not found', process.id, qname);
-		return;
-	};
+	async.waterfall([
+			function checkConnect(callback) {
+				var conn = self.connection[qname];
+				var error = null;
 
-	if( conn ) {
-		conn.createChannel(function(error, ch) {
-			ch.assertQueue(qname, {durable: false}, function(error, ok) {
+				if(conn === null || conn === undefined) {
+					error = new Error('RabbitMQ Connect error');
+				}
+
+				callback( error, conn );
+			},
+			function createChannel(conn, callback) {
+				conn.createChannel(function(error, channel) {
+					callback( error, channel );					
+				});
+			},
+			function assertQueue(channel, callback) {
+				channel.assertQueue(qname, {durable: false}, function(error, ok) {
+					callback( error, ok, channel );
+				});
+			},
+			function sendToQueue(ok, channel, callback) {
 				var strData = JSON.stringify(data);
+				var error = null;
 
 				log.info('[%d] send to %s data : %s', process.pid, qname, strData);
-				ch.sendToQueue(qname, new Buffer(strData));
-				ch.close();
-			});
-		});
-	}
+
+				channel.sendToQueue(qname, new Buffer(strData));
+				channel.close();
+
+				callback( error, null );
+			}
+		], 
+		function done(error, result) {
+			if( error ) log.error('[%d] Queue(%s) error : %s', process.pid, qname, error.message);
+
+			if( typeof callback === 'function' ) callback( error, result );
+	});
 };
 
 RabbitMQ.prototype.rpc = function(qname, data, callback) {
@@ -94,7 +117,6 @@ RabbitMQ.prototype.rpc = function(qname, data, callback) {
 	// }
 
 	amqp.connect( queues.write.url , function(error, conn) {
-
 		if( conn ) {
 			conn.createChannel(function(error, ch) {
 				var correlationId = uuid();	
