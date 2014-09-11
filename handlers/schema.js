@@ -1,7 +1,7 @@
 var rabbitmq = require('../connectors/rabbitmq');
 var keys = require('../utils/keys');
 
-exports.createSchema = function(input) {
+exports.createSchema = function(input, callback) {
 	var json = {
 		schema: Object.keys(input.object),
 		applicationId: input.applicationId,
@@ -9,10 +9,10 @@ exports.createSchema = function(input) {
 		method: 'create'
 	};
 
-	rabbitmq.publish('schema', json);
+	rabbitmq.publish('schema', json, callback);
 };
 
-exports.updateSchema = function(input) {
+exports.updateSchema = function(input, callback) {
 	var json = {
 		schema: Object.keys(input.object),
 		applicationId: input.applicationId,
@@ -20,5 +20,5 @@ exports.updateSchema = function(input) {
 		method: 'update'
 	};
 
-	rabbitmq.publish('schema', json);
+	rabbitmq.publish('schema', json, callback);
 };

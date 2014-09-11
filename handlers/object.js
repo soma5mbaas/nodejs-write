@@ -5,10 +5,7 @@ exports.createObject = function(input, callback) {
 	// 	callback( null, JSON.parse(msg) );
 	// });
 
-	rabbitmq.publish('write', input);
-	callback( null, null );
-
-
+	rabbitmq.publish('write', input, callback);
 };
 
 exports.updateObject = function(input, callback) {
@@ -16,8 +13,7 @@ exports.updateObject = function(input, callback) {
 	// 	callback( null, JSON.parse(msg));
 	// });
 
-	rabbitmq.publish('write', input);
-	callback( null, null );
+	rabbitmq.publish('write', input, callback);
 };
 
 exports.deleteObject = function(input, callback) {
@@ -25,6 +21,5 @@ exports.deleteObject = function(input, callback) {
 	// 	callback( null, JSON.parse(msg));
 	// });
 
-	rabbitmq.publish('write', input);
-	callback( null, null );
+	rabbitmq.publish('write', input, callback);
 };

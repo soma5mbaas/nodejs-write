@@ -7,7 +7,7 @@ var sendError = require('../utils/util').sendError;
 var uuid = require('uuid');
 
 // /classes/<className>					POST	Creating Objects
-exports.create = function (req, res) {
+exports.create = function(req, res) {
 	// Header
 	var input = util.getHeader(req);
 	var output = {};
@@ -29,14 +29,16 @@ exports.create = function (req, res) {
 	output.updateAt = input.object.updateAt;
 
 
-	schemaHandler.createSchema(input);
-	objectHandler.createObject(input);
+	objectHandler.createObject(input, function(error, result) {
+		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
 
-	res.json(input);
+		res.json(output);
+		schemaHandler.createSchema(input);
+	});
 };
 
 // /classes/<className>/<objectId>		PUT	Updating Objects
-exports.update = function (req, res) {
+exports.update = function(req, res) {
 	// Header
 	var input = util.getHeader(req);
 	var output = {};
@@ -54,21 +56,18 @@ exports.update = function (req, res) {
 	output.objectId = input.object.objectId;
 	output.updateAt = input.object.updateAt;
 
-	objectHandler.updateObject( input, function(error, result) {
-		if(error) {
-			// send errorCode
-			return sendError(res, errorCode.OTHER_CAUSE);
-		} else {
-			// send result
-			res.json(output);
-			schemaHandler.updateSchema(input);
-		}
+
+	objectHandler.updateObject(input, function(error, result) {
+		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
+
+		res.json(output);
+		schemaHandler.updateSchema(input);
 	});
 	
 };
 
 // /classes/<className>/<objectId>		DELETE	Deleting Objects
-exports._delete = function (req, res) {
+exports.delete = function(req, res) {
 	// Header
 	var input = util.getHeader(req);
 	var output = {};
@@ -76,19 +75,30 @@ exports._delete = function (req, res) {
 	// Body
 	input.class = req.params.classname;
 	input.method = 'delete';
-	input.object.objectId = req.params.objectid;
+	input.object= {obejctId: req.params.objectid};
 
 	// Output
 	output.objectId = input.object.objectId;
 
 	objectHandler.deleteObject( input, function(error, result) {
-		if(error) {
-			// send errorCode
-			return sendError(res, errorCode.OTHER_CAUSE);
-		} else {
-			// send result
-			res.json(output);
-		}
-	});
-	
+		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
+
+		res.json(output);
+	});	
+};
+
+exports.batch = function(req, res) {
+	var requests = req.body.requests;
+	var output = [];
+
+	for( var i = 0; i < requests.length; i++ ) {
+		var obj = {};
+		var request = requests[i];
+		
+		obj.method = request.method;
+
+		output.push(obj);
+	};
+
+	res.json( output );
 };
