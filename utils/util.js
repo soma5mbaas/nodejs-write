@@ -15,12 +15,11 @@ function getAPIInfo( req ) {
 	return api;
 };
 
-
 exports.getHeader = function( req ) {
 	var header = {};
 	header.applicationId = req.get('Application-Id');
 	header.api = getAPIInfo( req );
-
+	header.timestamp = Date.now();
 	return header;
 };
 
