@@ -19,21 +19,39 @@ exports.create = function(req, res) {
 	// Object
 	input.object = req.body;
 	input.object.objectId = input.objectId = uuid();
-	input.object.createAt = new Date();
-	input.object.updateAt = new Date();
+
+	var properties = Object.keys(input.object);
+	var schema = [];
+	for(var i = 0; i < properties.length; i++) {
+		var property = properties[i];
+		var value = input.object[property];
+
+		var type = typeof value;
+
+		if( type === 'object' && Array.isArray(value) ) {
+			type = 'array';
+		}
+
+		schema.push( property + '.' + type );
+		input.object[property] = value.toString();
+	}
+	
+	input.object.createAt = input.object.updateAt = input.timestamp.toString();
+	schema.push('createAt.date');
+	schema.push('updateAt.date');
 
 
 	// Output
 	output.objectId = input.object.objectId;
-	output.createAt = input.object.createAt;
-	output.updateAt = input.object.updateAt;
+	output.createAt = new Date( parseInt(input.object.createAt) );
+	output.updateAt = new Date( parseInt(input.object.updateAt) );
 
 
 	objectHandler.createObject(input, function(error, result) {
 		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
 
 		res.json(output);
-		schemaHandler.createSchema(input);
+		schemaHandler.createSchema(input.applicationId, input.class, schema);
 	});
 };
 
@@ -50,18 +68,34 @@ exports.update = function(req, res) {
 	// Object
 	input.object = req.body;
 	input.object.objectId = req.params.objectid;
-	input.object.updateAt = new Date();
+
+	var properties = Object.keys(input.object);
+	var schema = [];
+	for(var i = 0; i < properties.length; i++) {
+		var property = properties[i];
+		var value = input.object[property];
+
+		var type = typeof value;
+
+		if( type === 'object' && Array.isArray(value) ) {
+			type = 'array';
+		}
+
+		schema.push( property + '.' + type );
+		input.object[property] = value.toString();
+	}
+
+	input.object.updateAt = input.timestamp.toString();
 
 	// Output
 	output.objectId = input.object.objectId;
-	output.updateAt = input.object.updateAt;
-
+	output.updateAt = new Date( parseInt(input.object.updateAt) );
 
 	objectHandler.updateObject(input, function(error, result) {
 		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
 
 		res.json(output);
-		schemaHandler.updateSchema(input);
+		schemaHandler.updateSchema(input.applicationId, input.class, schema);
 	});
 	
 };
@@ -75,14 +109,13 @@ exports.delete = function(req, res) {
 	// Body
 	input.class = req.params.classname;
 	input.method = 'delete';
-	input.object= {obejctId: req.params.objectid};
+	input.object= { obejctId: req.params.objectid };
 
 	// Output
 	output.objectId = input.object.objectId;
 
 	objectHandler.deleteObject( input, function(error, result) {
 		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
-
 		res.json(output);
 	});	
 };
