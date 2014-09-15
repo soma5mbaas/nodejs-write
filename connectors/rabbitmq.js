@@ -56,7 +56,7 @@ RabbitMQ.prototype.publish = function(qname, data, callback) {
 				});
 			},
 			function assertQueue(channel, callback) {
-				channel.assertQueue(qname, {durable: false}, function(error, ok) {
+				channel.assertQueue(qname, {durable: true, exclusive: false}, function(error, ok) {
 					callback( error, ok, channel );
 				});
 			},
@@ -87,34 +87,34 @@ RabbitMQ.prototype.rpc = function(qname, data, callback) {
 	// 	return;
 	// };
 
-	// if( conn ) {
-	// 	conn.createChannel(function(error, ch) {
-	// 		var correlationId = uuid();	
-	// 		var rply_queue = 'rply_queue:' + process.pid;
+	if( conn ) {
+		conn.createChannel(function(error, ch) {
+			var correlationId = uuid();	
+			var rply_queue = 'rply_queue:' + process.pid;
 
 
-	// 		ch.assertQueue(rply_queue, {exclusive: true}, function(error, ok) {
-	// 			var queue = rply_queue;
+			ch.assertQueue(rply_queue, {exclusive: true}, function(error, ok) {
+				var queue = rply_queue;
 
-	// 			var strData = JSON.stringify(data);
+				var strData = JSON.stringify(data);
 
-	// 			ch.consume(queue, function(msg) {
-	// 				if (msg.properties.correlationId === correlationId) {
-	// 					callback(msg.content.toString());
-	// 				} else {
-	// 					log.debug(msg.properties.correlationId);
-	// 				}
+				ch.consume(queue, function(msg) {
+					if (msg.properties.correlationId === correlationId) {
+						callback(msg.content.toString());
+					} else {
+						log.debug(msg.properties.correlationId);
+					}
 
-	// 				ch.close();
+					ch.close();
 
-	// 			}, {noAck: false});
+				}, {noAck: false});
 
-	// 			log.info('[%d] send to %s data : %s', process.pid, qname, strData);
-	// 			ch.sendToQueue(qname, new Buffer(strData), {replyTo: queue, correlationId: correlationId} );
+				log.info('[%d] send to %s data : %s', process.pid, qname, strData);
+				ch.sendToQueue(qname, new Buffer(strData), {replyTo: queue, correlationId: correlationId} );
 
-	// 		});
-	// 	});
-	// }
+			});
+		});
+	}
 
 	amqp.connect( queues.write.url , function(error, conn) {
 		if( conn ) {
