@@ -73,66 +73,6 @@ exports.delete = function(req, res) {
 exports.batch = function(req, res) {
 	var header = util.getHeader(req);
 	var requests = req.body.requests;
-	var outputs = [];
-
-	// requests.forEach( function(request) {
-	// 	var obj = {};
-	// 	var input = util.getHeader(req);
-
-
-	// 	input.method = request.method;
-	// 	input.class = request.class;
-	// 	input.object = request.object;
-
-	// 	if( input.method === 'create' ) {
-	// 		input.object.objectId = input.objectId = uuid();
-	// 		input.object.createAt = input.object.updateAt = new Date(input.timestamp);
-			
-	// 		var output = {};
-
-
-	// 		objectHandler.createObject(input, function(error, result) {
-	// 			if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
-				
-
-	// 			output.objectId = input.object.objectId;
-	// 			output.createAt = input.object.createAt;
-	// 			output.updateAt = input.object.updateAt;
-
-	// 			outputs[ requests.indexOf(request) ] = output;
-
-	// 			schemaHandler.createSchema(input);
-	// 		});
-	// 	} else if( input.method === 'update' ) {
-	// 		input.object.updateAt = new Date(input.timestamp);
-	// 		input.objectId = request.objectId;
-
-	// 		var output = {};
-
-
-	// 		objectHandler.updateObject(input, function(error, result) {
-	// 			if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
-
-	// 			output.objectId = input.object.objectId;
-	// 			output.updateAt = input.object.updateAt;
-
-	// 			outputs[ requests.indexOf(request) ] = output;
-
-	// 			schemaHandler.updateSchema(input);
-	// 		});
-	// 	} else if( input.method === 'delete' ) {
-	// 		input.objectId = request.objectId;
-			
-	// 		var output = {};
-
-	// 		objectHandler.deleteObject( input, function(error, result) {
-	// 			if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
-
-	// 			outputs[ requests.indexOf(request) ] = output;
-	// 		});	
-	// 	}
-		
-	// });
 
 	async.times(requests.length, function(n, next) {
 		var obj = {};
