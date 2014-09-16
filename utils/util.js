@@ -52,6 +52,8 @@ exports.exportSchema = function( object ) {
 		}
 
 		schema.push( property + '.' + type );
+
+		console.log( property + '.' + type );
 	}
 
 	return schema;
@@ -60,10 +62,19 @@ exports.exportSchema = function( object ) {
 // JSON objejct 의 value 를 string 으로 parsing 한다.
 exports.parseToString = function( json ) {
 	var properties = Object.keys( json );
-	
+	var newJson = {};
 	properties.forEach(function(property) {
-		json[property] = json[property].toString();
+		newJson[property] = json[property].toString();
 	});
 
-	return json;
+	return newJson;
 };
+
+exports.deepCopy = function(object) {
+	var newObject = Object.keys(object).reduce(function (obj, item) {
+		obj[item] = object[item];
+		return obj;
+	},{});
+
+	return newObject;
+}
