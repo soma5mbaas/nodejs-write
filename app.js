@@ -2,8 +2,8 @@ var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
-var object = require('./routes/object');
+var index = require('./routes/index');
+var routeV1 = require('./routes/routeV1');
 
 var token = require('./utils/token');
 
@@ -13,12 +13,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 
 
-app.use(token.checkToken());
+// app.use(token.checkToken());
 
 
+app.use('/', index);
 
-app.use('/', routes);
-app.use('/classes', object);
+// version 1.0
+app.use('/1', routeV1);
 
 
 module.exports = app;

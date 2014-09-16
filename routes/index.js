@@ -7,7 +7,6 @@ router.post('/', function(req, res) {
 	res.json({});
 });
 
-// PUT
 
 // GET
 router.get('/health', function(req, res) {
