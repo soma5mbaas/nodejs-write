@@ -17,12 +17,53 @@ function getAPIInfo( req ) {
 
 exports.getHeader = function( req ) {
 	var header = {};
+
+	// 기본 정보 
 	header.applicationId = req.get('Application-Id');
 	header.api = getAPIInfo( req );
 	header.timestamp = Date.now();
+
+	// 옵션 정보
+	if( req.params.classname ) header.class = req.params.classname;
+	if( req.params.objectid ) header.objectId = req.params.objectid;  
+
 	return header;
 };
 
 exports.sendError = function(res, errorCode) {
 	res.status( errorCode.status ).json( errorCode.info );
+};
+
+// json의 schema와 데이터 타입을 배열로 만들어 리턴한다.
+exports.exportSchema = function( object ) {
+	var properties = Object.keys( object );
+	var schema = [];
+
+	for(var i = 0; i < properties.length; i++) {
+		var property = properties[i];
+		var value = object[property];
+
+		var type = typeof value;
+
+		if( type === 'object' && Array.isArray(value) ) {
+			type = 'array';
+		} else if( type === 'string' ) {
+
+		}
+
+		schema.push( property + '.' + type );
+	}
+
+	return schema;
+};
+
+// JSON objejct 의 value 를 string 으로 parsing 한다.
+exports.parseToString = function( json ) {
+	var properties = Object.keys( json );
+	
+	properties.forEach(function(property) {
+		json[property] = json[property].toString();
+	});
+
+	return json;
 };
