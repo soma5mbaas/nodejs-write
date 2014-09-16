@@ -33,7 +33,13 @@
 	}
 	
 	,"LINKED_ID_MISSING":   250
-	,"MISSING_OBJECT_ID":   104
+	,"MISSING_OBJECT_ID":{
+		"status" : 404,
+		"info": {
+			"code": 104,
+			"error": "MISSING_OBJECT_ID"
+		}
+	}   
 	,"MISSING_USER_TOKEN": {	
 		"status": 401,
 		"info": {
