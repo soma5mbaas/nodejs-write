@@ -63,8 +63,7 @@ exports.delete = function(req, res) {
 	objectHandler.deleteObject( input, function(error, result) {
 		if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
 		
-		var output = {};
-		output.objectId = input.objectId;
+		var output = { objectId: input.objectId };
 
 		res.json(output);
 	});	
