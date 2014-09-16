@@ -5,53 +5,29 @@ var objectHandler = require('../handlers/object');
 var schemaHandler = require('../handlers/schema');
 var sendError = require('../utils/util').sendError;
 var uuid = require('uuid');
+var async = require('async');
 
 // /classes/<className>					POST	Creating Objects
 exports.create = function(req, res) {
 	// Header
 	var input = util.getHeader(req);
-	var output = {};
-
-	// Body
-	input.class = req.params.classname;
-	input.method = 'create';
 
 	// Object
 	input.object = req.body;
 	input.object.objectId = input.objectId = uuid();
-
-	var properties = Object.keys(input.object);
-	var schema = [];
-	for(var i = 0; i < properties.length; i++) {
-		var property = properties[i];
-		var value = input.object[property];
-
-		var type = typeof value;
-
-		if( type === 'object' && Array.isArray(value) ) {
-			type = 'array';
-		}
-
-		schema.push( property + '.' + type );
-		input.object[property] = value.toString();
-	}
-	
-	input.object.createAt = input.object.updateAt = input.timestamp.toString();
-	schema.push('createAt.date');
-	schema.push('updateAt.date');
-
-
-	// Output
-	output.objectId = input.object.objectId;
-	output.createAt = new Date( parseInt(input.object.createAt) );
-	output.updateAt = new Date( parseInt(input.object.updateAt) );
-
+	input.object.createAt = input.object.updateAt = new Date(input.timestamp);
 
 	objectHandler.createObject(input, function(error, result) {
 		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
 
+		schemaHandler.createSchema(input);
+		
+		var output = {};
+		output.objectId = input.object.objectId;
+		output.createAt = input.object.createAt;
+		output.updateAt = input.object.updateAt;
+
 		res.json(output);
-		schemaHandler.createSchema(input.applicationId, input.class, schema);
 	});
 };
 
@@ -59,43 +35,22 @@ exports.create = function(req, res) {
 exports.update = function(req, res) {
 	// Header
 	var input = util.getHeader(req);
-	var output = {};
-
-	// Body
-	input.class = req.params.classname;
-	input.method = 'update';
 
 	// Object
 	input.object = req.body;
-	input.object.objectId = req.params.objectid;
+	input.object.updateAt = new Date(input.timestamp);
 
-	var properties = Object.keys(input.object);
-	var schema = [];
-	for(var i = 0; i < properties.length; i++) {
-		var property = properties[i];
-		var value = input.object[property];
-
-		var type = typeof value;
-
-		if( type === 'object' && Array.isArray(value) ) {
-			type = 'array';
-		}
-
-		schema.push( property + '.' + type );
-		input.object[property] = value.toString();
-	}
-
-	input.object.updateAt = input.timestamp.toString();
-
-	// Output
-	output.objectId = input.object.objectId;
-	output.updateAt = new Date( parseInt(input.object.updateAt) );
 
 	objectHandler.updateObject(input, function(error, result) {
 		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
 
+		schemaHandler.updateSchema(input);
+
+		var output = {};
+		output.objectId = input.object.objectId;
+		output.updateAt = input.object.updateAt;
+		
 		res.json(output);
-		schemaHandler.updateSchema(input.applicationId, input.class, schema);
 	});
 	
 };
@@ -104,34 +59,141 @@ exports.update = function(req, res) {
 exports.delete = function(req, res) {
 	// Header
 	var input = util.getHeader(req);
-	var output = {};
-
-	// Body
-	input.class = req.params.classname;
-	input.method = 'delete';
-	input.object= { obejctId: req.params.objectid };
-
-	// Output
-	output.objectId = input.object.objectId;
 
 	objectHandler.deleteObject( input, function(error, result) {
-		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
+		if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+		
+		var output = {};
+		output.objectId = input.objectId;
+
 		res.json(output);
 	});	
 };
 
 exports.batch = function(req, res) {
+	var header = util.getHeader(req);
 	var requests = req.body.requests;
-	var output = [];
+	var outputs = [];
 
-	for( var i = 0; i < requests.length; i++ ) {
-		var obj = {};
-		var request = requests[i];
+	// requests.forEach( function(request) {
+	// 	var obj = {};
+	// 	var input = util.getHeader(req);
+
+
+	// 	input.method = request.method;
+	// 	input.class = request.class;
+	// 	input.object = request.object;
+
+	// 	if( input.method === 'create' ) {
+	// 		input.object.objectId = input.objectId = uuid();
+	// 		input.object.createAt = input.object.updateAt = new Date(input.timestamp);
+			
+	// 		var output = {};
+
+
+	// 		objectHandler.createObject(input, function(error, result) {
+	// 			if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+				
+
+	// 			output.objectId = input.object.objectId;
+	// 			output.createAt = input.object.createAt;
+	// 			output.updateAt = input.object.updateAt;
+
+	// 			outputs[ requests.indexOf(request) ] = output;
+
+	// 			schemaHandler.createSchema(input);
+	// 		});
+	// 	} else if( input.method === 'update' ) {
+	// 		input.object.updateAt = new Date(input.timestamp);
+	// 		input.objectId = request.objectId;
+
+	// 		var output = {};
+
+
+	// 		objectHandler.updateObject(input, function(error, result) {
+	// 			if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+
+	// 			output.objectId = input.object.objectId;
+	// 			output.updateAt = input.object.updateAt;
+
+	// 			outputs[ requests.indexOf(request) ] = output;
+
+	// 			schemaHandler.updateSchema(input);
+	// 		});
+	// 	} else if( input.method === 'delete' ) {
+	// 		input.objectId = request.objectId;
+			
+	// 		var output = {};
+
+	// 		objectHandler.deleteObject( input, function(error, result) {
+	// 			if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+
+	// 			outputs[ requests.indexOf(request) ] = output;
+	// 		});	
+	// 	}
 		
-		obj.method = request.method;
+	// });
 
-		output.push(obj);
-	};
+	async.times(requests.length, function(n, next) {
+		var obj = {};
+		var input = util.getHeader(req);
+		var request = requests[n];
 
-	res.json( output );
+		input.method = request.method;
+		input.class = request.class;
+		input.object = request.object;
+
+		if( input.method === 'create' ) {
+			input.object.objectId = input.objectId = uuid();
+			input.object.createAt = input.object.updateAt = new Date(input.timestamp);
+			
+			var output = {};
+
+
+			objectHandler.createObject(input, function(error, result) {
+				if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+				
+
+				output.objectId = input.object.objectId;
+				output.createAt = input.object.createAt;
+				output.updateAt = input.object.updateAt;
+
+				schemaHandler.createSchema(input);
+
+				next(error, output);
+			});
+		} else if( input.method === 'update' ) {
+			input.object.updateAt = new Date(input.timestamp);
+			input.objectId = request.objectId;
+
+			var output = {};
+
+
+			objectHandler.updateObject(input, function(error, result) {
+				if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+
+				output.objectId = input.object.objectId;
+				output.updateAt = input.object.updateAt;
+
+				schemaHandler.updateSchema(input);
+
+				next(error, output);
+			});
+		} else if( input.method === 'delete' ) {
+			input.objectId = request.objectId;
+			
+			var output = {};
+
+			objectHandler.deleteObject( input, function(error, result) {
+				if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+
+				next(error, output);
+			});	
+		}
+	}, function done(error, outputs) {
+		res.json( outputs );
+	});
 };
+
+
+
