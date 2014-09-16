@@ -73,9 +73,11 @@ RabbitMQ.prototype.publish = function(qname, data, callback) {
 			}
 		], 
 		function done(error, result) {
-			if( error ) log.error('[%d] Queue(%s) error : %s', process.pid, qname, error.message);
+			if( error ) { log.error('[%d] Queue(%s) error : %s', process.pid, qname, error.message); }
 
-			if( typeof callback === 'function' ) callback( error, result );
+			if( typeof callback === 'function' ) { 
+				return callback( error, result ); 
+			}
 	});
 };
 
