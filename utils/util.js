@@ -47,13 +47,12 @@ exports.exportSchema = function( object ) {
 
 		if( type === 'object' && Array.isArray(value) ) {
 			type = 'array';
-		} else if( type === 'string' ) {
-
 		}
+		 else if( type === 'object' && Object.prototype.toString.call(value) === '[object Date]' ) {
+			type = 'date';
+		}	
 
 		schema.push( property + '.' + type );
-
-		console.log( property + '.' + type );
 	}
 
 	return schema;
