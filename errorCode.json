@@ -33,11 +33,11 @@
 	}
 	
 	,"LINKED_ID_MISSING":   250
-	,"MISSING_OBJECT_ID":{
+	,"MISSING_ENTITY_ID":{
 		"status" : 404,
 		"info": {
 			"code": 104,
-			"error": "MISSING_OBJECT_ID"
+			"error": "MISSING_ENTITY_ID"
 		}
 	}   
 	,"MISSING_USER_TOKEN": {	
@@ -49,8 +49,8 @@
 	}
 	,"MUST_CREATE_USER_THROUGH_SIGNUP": 207
 	,"NOT_INITIALIZED": 109
-	,"OBJECT_NOT_FOUND":    101
-	,"OBJECT_TOO_LARGE":    116
+	,"ENTITY_NOT_FOUND":    101
+	,"ENTITY_TOO_LARGE":    116
 	,"OPERATION_FORBIDDEN": 119
 	,"OTHER_CAUSE": {
 		"status": 500,
