@@ -25,7 +25,7 @@ exports.getHeader = function( req ) {
 
 	// 옵션 정보
 	if( req.params.classname ) header.class = req.params.classname;
-	if( req.params.objectid ) header.objectId = req.params.objectid;  
+	if( req.params._id ) header._id = req.params._id;  
 
 	return header;
 };

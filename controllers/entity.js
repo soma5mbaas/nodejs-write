@@ -1,69 +1,69 @@
 var util = require('../utils/util');
 var token = require('../utils/token');
 // var rabbitmq = require('../handlers/rabbitmq');
-var objectHandler = require('../handlers/object');
+var entityHandler = require('../handlers/entity');
 var schemaHandler = require('../handlers/schema');
 var sendError = require('../utils/util').sendError;
 var uuid = require('uuid');
 var async = require('async');
 
-// /classes/<className>					POST	Creating Objects
+// /classes/<className>					POST	Creating Entitys
 exports.create = function(req, res) {
 	// Header
 	var input = util.getHeader(req);
 
-	// Object
-	input.object = req.body;
-	input.object.objectId = input.objectId = uuid();
-	input.object.createAt = input.object.updateAt = new Date(input.timestamp);
+	// Entity
+	input.entity = req.body;
+	input.entity._id = input._id = uuid();
+	input.entity.createAt = input.entity.updateAt = new Date(input.timestamp);
 
-	objectHandler.createObject(input, function(error, result) {
+	entityHandler.createEntity(input, function(error, result) {
 		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
 
 		schemaHandler.createSchema(input);
 		
 		var output = {};
-		output.objectId = input.object.objectId;
-		output.createAt = input.object.createAt;
-		output.updateAt = input.object.updateAt;
+		output._id = input.entity._id;
+		output.createAt = input.entity.createAt;
+		output.updateAt = input.entity.updateAt;
 
 		res.json(output);
 	});
 };
 
-// /classes/<className>/<objectId>		PUT	Updating Objects
+// /classes/<className>/<_id>		PUT	Updating Entitys
 exports.update = function(req, res) {
 	// Header
 	var input = util.getHeader(req);
 
-	// Object
-	input.object = req.body;
-	input.object.updateAt = new Date(input.timestamp);
+	// Entity
+	input.entity = req.body;
+	input.entity.updateAt = new Date(input.timestamp);
 
 
-	objectHandler.updateObject(input, function(error, result) {
+	entityHandler.updateEntity(input, function(error, result) {
 		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
 
 		schemaHandler.updateSchema(input);
 
 		var output = {};
-		output.objectId = input.object.objectId;
-		output.updateAt = input.object.updateAt;
+		output._id = input.entity._id;
+		output.updateAt = input.entity.updateAt;
 		
 		res.json(output);
 	});
 	
 };
 
-// /classes/<className>/<objectId>		DELETE	Deleting Objects
+// /classes/<className>/<_id>		DELETE	Deleting Entitys
 exports.delete = function(req, res) {
 	// Header
 	var input = util.getHeader(req);
 
-	objectHandler.deleteObject( input, function(error, result) {
+	entityHandler.deleteEntity( input, function(error, result) {
 		if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
 		
-		var output = { objectId: input.objectId };
+		var output = { _id: input._id };
 
 		res.json(output);
 	});	
@@ -80,50 +80,50 @@ exports.batch = function(req, res) {
 
 		input.method = request.method;
 		input.class = request.class;
-		input.object = request.object;
+		input.entity = request.entity;
 
 		if( input.method === 'create' ) {
-			input.object.objectId = input.objectId = uuid();
-			input.object.createAt = input.object.updateAt = new Date(input.timestamp);
+			input.entity._id = input._id = uuid();
+			input.entity.createAt = input.entity.updateAt = new Date(input.timestamp);
 			
 			var output = {};
 
 
-			objectHandler.createObject(input, function(error, result) {
+			entityHandler.createEntity(input, function(error, result) {
 				if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
 				
 
-				output.objectId = input.object.objectId;
-				output.createAt = input.object.createAt;
-				output.updateAt = input.object.updateAt;
+				output._id = input.entity._id;
+				output.createAt = input.entity.createAt;
+				output.updateAt = input.entity.updateAt;
 
 				schemaHandler.createSchema(input);
 
 				next(error, output);
 			});
 		} else if( input.method === 'update' ) {
-			input.object.updateAt = new Date(input.timestamp);
-			input.objectId = request.objectId;
+			input.entity.updateAt = new Date(input.timestamp);
+			input._id = request._id;
 
 			var output = {};
 
 
-			objectHandler.updateObject(input, function(error, result) {
+			entityHandler.updateEntity(input, function(error, result) {
 				if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
 
-				output.objectId = input.object.objectId;
-				output.updateAt = input.object.updateAt;
+				output._id = input.entity._id;
+				output.updateAt = input.entity.updateAt;
 
 				schemaHandler.updateSchema(input);
 
 				next(error, output);
 			});
 		} else if( input.method === 'delete' ) {
-			input.objectId = request.objectId;
+			input._id = request._id;
 			
 			var output = {};
 
-			objectHandler.deleteObject( input, function(error, result) {
+			entityHandler.deleteEntity( input, function(error, result) {
 				if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
 
 				next(error, output);

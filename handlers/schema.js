@@ -4,7 +4,7 @@ var util = require('../utils/util');
 
 exports.createSchema = function(input, callback) {
 	var json = {
-		schema: util.exportSchema( input.object ),
+		schema: util.exportSchema( input.entity ),
 		applicationId: input.applicationId,
 		class: input.class,
 		method: 'create'
@@ -15,7 +15,7 @@ exports.createSchema = function(input, callback) {
 
 exports.updateSchema = function(input, callback) {
 	var json = {
-		schema: util.exportSchema( input.object ),
+		schema: util.exportSchema( input.entity ),
 		applicationId: input.applicationId,
 		class: input.class,
 		method: 'update'

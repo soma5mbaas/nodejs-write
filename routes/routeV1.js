@@ -1,14 +1,14 @@
 var express = require('express');
 var router = express.Router();
-var object = require('../controllers/object');
+var entity = require('../controllers/entity');
 
 
 
-// object 
-router.post( '/classes/:classname', object.create );
-router.put( '/classes/:classname/:objectid', object.update );
-router.delete( '/classes/:classname/:objectid', object.delete ); 
-router.post('/batch', object.batch);
+// entity 
+router.post( '/classes/:classname', entity.create );
+router.put( '/classes/:classname/:_id', entity.update );
+router.delete( '/classes/:classname/:_id', entity.delete ); 
+router.post('/batch', entity.batch);
 
 
 
