@@ -34,7 +34,7 @@
             "colorize": true
         },
         "file": {
-            "level": "verbose",
+            "level": "file",
             "filename": "defalut.log",
             "json": false,
             "colorize": false
@@ -56,7 +56,7 @@
                 "error": "red",
                 "warn": "yellow",
                 "info": "green",
-                "debug": "green",
+                "debug": "red",
                 "file": "white"
             },
             "exitOnError": false

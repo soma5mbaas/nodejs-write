@@ -64,7 +64,9 @@ RabbitMQ.prototype.publish = function(qname, data, callback) {
 				var strData = JSON.stringify(data);
 				var error = null;
 
-				log.info('[%d] send to %s data : %s', process.pid, qname, strData);
+				// log.info('[%d] send to %s data : %s', process.pid, qname, strData);
+				if( !data.method )
+					log.debug('[%d] method : %s', process.pid, strData );
 
 				channel.sendToQueue(qname, new Buffer(strData));
 				channel.close();
