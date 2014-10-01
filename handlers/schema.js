@@ -1,10 +1,9 @@
 var rabbitmq = require('../connectors/rabbitmq');
-var keys = require('../utils/keys');
-var util = require('../utils/util');
+var exportSchema = require('haru-nodejs-util').common.exportSchema;
 
 exports.createSchema = function(input, callback) {
 	var json = {
-		schema: util.exportSchema( input.entity ),
+		schema: exportSchema( input.entity ),
 		applicationId: input.applicationId,
 		class: input.class,
 		method: 'create'
@@ -15,7 +14,7 @@ exports.createSchema = function(input, callback) {
 
 exports.updateSchema = function(input, callback) {
 	var json = {
-		schema: util.exportSchema( input.entity ),
+		schema: exportSchema( input.entity ),
 		applicationId: input.applicationId,
 		class: input.class,
 		method: 'update'

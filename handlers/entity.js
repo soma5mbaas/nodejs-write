@@ -1,6 +1,6 @@
 var rabbitmq = require('../connectors/rabbitmq');
-var util = require('../utils/util');
-var deepCopy = require('../utils/util').deepCopy;
+var parseToString = require('haru-nodejs-util').common.parseToString;
+var deepCopy = require('haru-nodejs-util').common.deepCopy;
 
 exports.createEntity = function(input, callback) {
 	// rabbitmq.rpc('write', input, function(msg) {
@@ -9,7 +9,8 @@ exports.createEntity = function(input, callback) {
 	var msg = deepCopy( input );
 
 	msg.method = 'create';
-	msg.entity = util.parseToString(input.entity);
+
+	msg.entity = parseToString(input.entity);
 
 	rabbitmq.publish('write', msg, callback);
 };
@@ -21,8 +22,7 @@ exports.updateEntity = function(input, callback) {
 
 	var msg = deepCopy( input );
 	
-	msg.method = 'update';
-	msg.entity = util.parseToString(input.entity);
+	msg.entity = parseToString(input.entity);
 
 	rabbitmq.publish('write', input, callback);
 };
@@ -31,7 +31,6 @@ exports.deleteEntity = function(input, callback) {
 	// rabbitmq.rpc('write', input, function(msg) {
 	// 	callback( null, JSON.parse(msg));
 	// });
-	input.method = 'delete';
 
 	rabbitmq.publish('write', input, callback);
 };

@@ -1,16 +1,21 @@
-var util = require('../utils/util');
+var util = require('haru-nodejs-util');
+var getHeader = util.common.getHeader;
+var sendError = util.common.sendError;
+
 var token = require('../utils/token');
-// var rabbitmq = require('../handlers/rabbitmq');
+
 var entityHandler = require('../handlers/entity');
 var schemaHandler = require('../handlers/schema');
-var sendError = require('../utils/util').sendError;
+
 var uuid = require('uuid');
 var async = require('async');
 
 // /classes/<className>					POST	Creating Entitys
 exports.create = function(req, res) {
 	// Header
-	var input = util.getHeader(req);
+	var input = getHeader(req);
+
+	input.method = 'create';
 
 	// Entity
 	input.entity = req.body;
@@ -34,7 +39,9 @@ exports.create = function(req, res) {
 // /classes/<className>/<_id>		PUT	Updating Entitys
 exports.update = function(req, res) {
 	// Header
-	var input = util.getHeader(req);
+	var input = getHeader(req);
+
+	input.method = 'update';
 
 	// Entity
 	input.entity = req.body;
@@ -58,7 +65,9 @@ exports.update = function(req, res) {
 // /classes/<className>/<_id>		DELETE	Deleting Entitys
 exports.delete = function(req, res) {
 	// Header
-	var input = util.getHeader(req);
+	var input = getHeader(req);
+
+	input.method = 'delete';
 
 	entityHandler.deleteEntity( input, function(error, result) {
 		if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
@@ -70,12 +79,12 @@ exports.delete = function(req, res) {
 };
 
 exports.batch = function(req, res) {
-	var header = util.getHeader(req);
+	var header = getHeader(req);
 	var requests = req.body.requests;
 
 	async.times(requests.length, function(n, next) {
 		var obj = {};
-		var input = util.getHeader(req);
+		var input = getHeader(req);
 		var request = requests[n];
 
 		input.method = request.method;

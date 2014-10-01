@@ -1,7 +1,7 @@
 var tokenBucket = require('../connectors/couchbase').get('token');
 var async = require('async');
 var url = require('url');
-var sendError = require('./util').sendError;
+var sendError = require('haru-nodejs-util').common.sendError;
 
 exports.checkToken = function(){
 	return function( req, res, next ) {
