@@ -23,7 +23,7 @@ process.on('uncaughtException', function(error) {
 });
 
 if( cluster.isMaster ) {
-	var processCount = require('os').cpus().length - 2;
+	var processCount = require('os').cpus().length - 2 || 1;
 
 	cluster.on('exit',function(worker) {
 		log.info('[%d] worker is exit', worker.process.pid);
