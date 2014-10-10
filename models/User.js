@@ -1,11 +1,13 @@
-exports.schema = [
-    "_id.string",
-    "updateAt.date",
-    "createAt.date",
-    "userName.string",
-    "passWord.string",
-    "email.string",
-];
+exports.schema = {
+    "_id": "string",
+    "updateAt": "date",
+    "createAt": "date",
+    "ACL": "ACL",
+
+    "userName": "string",
+    "passWord": "string",
+    "email": "string"
+};
 
 
 

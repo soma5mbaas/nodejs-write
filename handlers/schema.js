@@ -1,13 +1,15 @@
 var rabbitmq = require('../connectors/rabbitmq');
+
 var exportSchema = require('haru-nodejs-util').common.exportSchema;
 
+var EntitySchema = require('../models').Entity.schema;
 var InstallationSchema = require('../models').Installaion.schema;
 var UserSchema = require('../models').User.schema;
 
 
 exports.createSchema = function(input, callback) {
 	var json = {
-		schema: exportSchema( input.entity ),
+		schema: exportSchema( input.entity, EntitySchema ),
 		applicationId: input.applicationId,
 		class: input.class,
 		method: 'create'
@@ -28,10 +30,9 @@ exports.updateSchema = function(input, callback) {
 };
 
 
-// TODO installation 에 property가 추가되면 schema 에 추가하는 기능 추가
 exports.createInstallationSchema = function(input, callback) {
     var json = {
-        schema: InstallationSchema,
+        schema: exportSchema( input.entity ,InstallationSchema),
         applicationId: input.applicationId,
         calss: input.class,
         method: 'create'
@@ -40,7 +41,6 @@ exports.createInstallationSchema = function(input, callback) {
     rabbitmq.publish('schema', json, callback);
 };
 
-// TODO installation 에 property가 추가되면 schema 에 추가하는 기능 추가
 exports.updateInstallationSchema = function(input, callback) {
     var json = {
         schema: exportSchema( input.entity ),
@@ -53,10 +53,9 @@ exports.updateInstallationSchema = function(input, callback) {
     rabbitmq.publish('schema', json, callback);
 };
 
-// TODO user 에 property가 추가되면 schema 에 추가하는 기능 추가
 exports.createUserSchema = function(input, callback) {
     var json = {
-        schema: UserSchema,
+        schema: exportSchema( input.entity, UserSchema ),
         applicationId: input.applicationId,
         calss: input.class,
         method: 'create'
@@ -65,10 +64,9 @@ exports.createUserSchema = function(input, callback) {
     rabbitmq.publish('schema', json, callback);
 };
 
-// TODO user 에 property가 추가되면 schema 에 추가하는 기능 추가
 exports.updateUserSchema = function(input, callback) {
     var json = {
-        schema: UserSchema,
+        schema: exportSchema( input.entity ),
         applicationId: input.applicationId,
         calss: input.class,
         method: 'update'

@@ -7,19 +7,12 @@ var deepCopy = require('haru-nodejs-util').common.deepCopy;
  * worker 수정되면 parsing 하지 않게 수정
  * **/
 exports.createEntity = function(input, callback) {
-    // redis 저장을 위해 entity value들을 String으로 parsing
-	var msg = deepCopy( input );
-//	msg.entity = parseToString(input.entity);
-    
-
-	rabbitmq.publish('write', msg, callback);
+	rabbitmq.publish('write', input, callback);
 };
 
 exports.updateEntity = function(input, callback) {
 	var msg = deepCopy( input );
-//	msg.entity = parseToString(input.entity);
-
-	rabbitmq.publish('write', msg, callback);
+	rabbitmq.publish('write', input, callback);
 };
 
 exports.deleteEntity = function(input, callback) {
