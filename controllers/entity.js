@@ -20,13 +20,13 @@ exports.create = function(req, res) {
 	// Entity
 	input.entity = req.body;
 	input.entity._id = input._id = uuid();
-	input.entity.createAt = input.entity.updateAt = new Date(input.timestamp);
+	input.entity.createAt = input.entity.updateAt = input.timestamp;
 
 	entityHandler.createEntity(input, function(error, result) {
 		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
 
 		schemaHandler.createSchema(input);
-		
+
 		var output = {};
 		output._id = input.entity._id;
 		output.createAt = input.entity.createAt;
@@ -34,6 +34,7 @@ exports.create = function(req, res) {
 
 		res.json(output);
 	});
+
 };
 
 // /classes/<className>/<_id>		PUT	Updating Entitys
@@ -45,7 +46,7 @@ exports.update = function(req, res) {
 
 	// Entity
 	input.entity = req.body;
-	input.entity.updateAt = new Date(input.timestamp);
+	input.entity.updateAt = input.timestamp;
 
 
 	entityHandler.updateEntity(input, function(error, result) {
@@ -56,10 +57,10 @@ exports.update = function(req, res) {
 		var output = {};
 		output._id = input.entity._id;
 		output.updateAt = input.entity.updateAt;
-		
+
 		res.json(output);
 	});
-	
+
 };
 
 // /classes/<className>/<_id>		DELETE	Deleting Entitys
@@ -71,11 +72,11 @@ exports.delete = function(req, res) {
 
 	entityHandler.deleteEntity( input, function(error, result) {
 		if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
-		
+
 		var output = { _id: input._id };
 
 		res.json(output);
-	});	
+	});
 };
 
 exports.batch = function(req, res) {
@@ -93,14 +94,14 @@ exports.batch = function(req, res) {
 
 		if( input.method === 'create' ) {
 			input.entity._id = input._id = uuid();
-			input.entity.createAt = input.entity.updateAt = new Date(input.timestamp);
-			
+			input.entity.createAt = input.entity.updateAt = input.timestamp;
+
 			var output = {};
 
 
 			entityHandler.createEntity(input, function(error, result) {
 				if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
-				
+
 
 				output._id = input.entity._id;
 				output.createAt = input.entity.createAt;
@@ -111,7 +112,7 @@ exports.batch = function(req, res) {
 				next(error, output);
 			});
 		} else if( input.method === 'update' ) {
-			input.entity.updateAt = new Date(input.timestamp);
+			input.entity.updateAt = input.timestamp;
 			input._id = request._id;
 
 			var output = {};
@@ -129,19 +130,16 @@ exports.batch = function(req, res) {
 			});
 		} else if( input.method === 'delete' ) {
 			input._id = request._id;
-			
+
 			var output = {};
 
 			entityHandler.deleteEntity( input, function(error, result) {
 				if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
 
 				next(error, output);
-			});	
+			});
 		}
 	}, function done(error, outputs) {
 		res.json( outputs );
 	});
 };
-
-
-
