@@ -6,33 +6,30 @@ var async = require('async');
 
 function RabbitMQ() {
 	this.connection = {};
-
 	var self = this;
 
-	amqp.connect( queues.write.url, function(error, conn) {
-		self.connection.write = conn;
-		log.info('[%d] rabbitmq write connected', process.pid);
-	});
+    Object.keys(queues).forEach(function(queueName) {
+        var queue =  queues[queueName];
 
-	amqp.connect( queues.schema.url, function(error, conn) {
-		self.connection.schema = conn;
-		log.info('[%d] rabbitmq schema connected', process.pid);
-	});
+        amqp.connect( queue.url, function(error, conn) {
+            self.connection[queueName] = conn;
+            log.info('[%d] rabbitmq %s connected', process.pid, queueName);
+        });
+    })
 
 };
 
 RabbitMQ.prototype.connect = function() {
 	var self = this;
 
-	amqp.connect( queues.write.url, function(error, conn) {
-		self.connection.write = conn;
-		log.info('[%d] rabbitmq write connected', process.pid);
-	});
+    Object.keys(queues).forEach(function(queueName) {
+        var queue =  queues[queueName];
 
-	amqp.connect( queues.schema, function(error, conn) {
-		self.connection.schema = conn;
-		log.info('[%d] rabbitmq schema connected', process.pid);
-	});
+        amqp.connect( queue.url, function(error, conn) {
+            self.connection[queueName] = conn;
+            log.info('[%d] rabbitmq %s connected', process.pid, queueName);
+        });
+    })
 
 };	
 
