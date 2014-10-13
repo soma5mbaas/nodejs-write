@@ -24,7 +24,7 @@ exports.create = function (req, res) {
     entityHandler.createEntity(input, function (error, result) {
         if(error) { return sendError(res, errorCode.OTHER_CAUSE); }
 
-        schemaHandler.createInstallationSchema(input);
+        schemaHandler.createUserSchema(input);
 
         var output = {};
         output._id = input.entity._id;
@@ -49,7 +49,7 @@ exports.update = function(req, res) {
     entityHandler.updateEntity(input, function(error, result) {
         if( error ) return sendError(res, errorCode.OTHER_CAUSE);
 
-        schemaHandler.updateSchema(input);
+        schemaHandler.updateUserSchema(input);
 
         var output = {};
         output._id = input.entity._id;
