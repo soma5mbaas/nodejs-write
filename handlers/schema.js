@@ -34,7 +34,7 @@ exports.createInstallationSchema = function(input, callback) {
     var json = {
         schema: exportSchema( input.entity ,InstallationSchema),
         applicationId: input.applicationId,
-        calss: input.class,
+        class: input.class,
         method: 'create'
     };
     
@@ -57,9 +57,10 @@ exports.createUserSchema = function(input, callback) {
     var json = {
         schema: exportSchema( input.entity, UserSchema ),
         applicationId: input.applicationId,
-        calss: input.class,
+        class: input.class,
         method: 'create'
     };
+    
 
     rabbitmq.publish('schema', json, callback);
 };
@@ -68,7 +69,7 @@ exports.updateUserSchema = function(input, callback) {
     var json = {
         schema: exportSchema( input.entity ),
         applicationId: input.applicationId,
-        calss: input.class,
+        class: input.class,
         method: 'update'
     };
 
