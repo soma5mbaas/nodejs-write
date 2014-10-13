@@ -6,12 +6,14 @@ var index = require('./routes/index');
 var routeV1 = require('./routes/routeV1');
 
 var token = require('./utils/token');
+var cors = require('cors');
+
 
 var app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-
+app.use(cors());
 
 // app.use(token.checkToken());
 
