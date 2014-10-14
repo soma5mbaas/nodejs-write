@@ -10,6 +10,7 @@ var user = require('../controllers/user');
 router.post( '/classes/:classname', entity.create );
 router.put( '/classes/:classname/:_id', entity.update );
 router.delete( '/classes/:classname/:_id', entity.delete );
+router.delete( '/classes/:classname', entity.deleteClass);
 router.post('/batch', entity.batch);
 
 ////Installation

@@ -18,3 +18,11 @@ exports.updateEntity = function(input, callback) {
 exports.deleteEntity = function(input, callback) {
 	rabbitmq.publish('write', input, callback);
 };
+
+exports.deleteClass = function(input, callback) {
+    rabbitmq.publish('write', input, callback);
+};
+
+exports.deleteField = function(input, callback) {
+    rabbitmq.publish('write', input, callback);
+};

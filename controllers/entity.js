@@ -7,6 +7,9 @@ var token = require('../utils/token');
 var entityHandler = require('../handlers/entity');
 var schemaHandler = require('../handlers/schema');
 
+var isEmptyObject = require('haru-nodejs-util').common.isEmptyObject;
+
+
 var uuid = require('uuid');
 var async = require('async');
 
@@ -17,10 +20,13 @@ exports.create = function(req, res) {
 
 	input.method = 'create';
 
+
 	// Entity
 	input.entity = req.body;
 	input.entity._id = input._id = uuid();
 	input.entity.createAt = input.entity.updateAt = input.timestamp;
+
+    console.log(input);
 
 	entityHandler.createEntity(input, function(error, result) {
 		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
@@ -68,15 +74,27 @@ exports.delete = function(req, res) {
 	// Header
 	var input = getHeader(req);
 
-	input.method = 'delete';
 
-	entityHandler.deleteEntity( input, function(error, result) {
-		if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
 
-		var output = { _id: input._id };
+    if( req.query.fields ) {
+        input.method = 'deleteFields';
+        input.fields = JSON.parse(req.query.fields);
 
-		res.json(output);
-	});
+        entityHandler.deleteField( input, function(error, result) {
+            if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+            var output = { _id: input._id };
+            res.json(output);
+        });
+    } else {
+        input.method = 'delete';
+
+        entityHandler.deleteEntity( input, function(error, result) {
+            if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+            var output = { _id: input._id };
+            res.json(output);
+        });
+    }
+
 };
 
 exports.batch = function(req, res) {
@@ -142,4 +160,15 @@ exports.batch = function(req, res) {
 	}, function done(error, outputs) {
 		res.json( outputs );
 	});
+};
+
+exports.deleteClass = function(req, res) {
+    var input = getHeader(req);
+
+    input.method = 'deleteClass';
+
+    entityHandler.deleteClass(input, function (error, result) {
+       schemaHandler.deleteSchema(input);
+       res.json({});
+    });
 };

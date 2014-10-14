@@ -14,7 +14,7 @@ exports.createSchema = function(input, callback) {
 		class: input.class,
 		method: 'create'
 	};
-
+    
 	rabbitmq.publish('schema', json, callback);
 };
 
@@ -71,6 +71,16 @@ exports.updateUserSchema = function(input, callback) {
         applicationId: input.applicationId,
         class: input.class,
         method: 'update'
+    };
+
+    rabbitmq.publish('schema', json, callback);
+};
+
+exports.deleteSchema = function(input, callback) {
+    var json = {
+        applicationId: input.applicationId,
+        class: input.class,
+        method: 'delete'
     };
 
     rabbitmq.publish('schema', json, callback);
