@@ -26,10 +26,8 @@ exports.create = function(req, res) {
 	input.entity._id = input._id = uuid();
 	input.entity.createAt = input.entity.updateAt = input.timestamp;
 
-    console.log(input);
-
 	entityHandler.createEntity(input, function(error, result) {
-		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
+		if( error ) { return sendError(res, error); }
 
 		schemaHandler.createSchema(input);
 
@@ -56,7 +54,7 @@ exports.update = function(req, res) {
 
 
 	entityHandler.updateEntity(input, function(error, result) {
-		if( error ) return sendError(res, errorCode.OTHER_CAUSE);
+        if( error ) { return sendError(res, error); }
 
 		schemaHandler.updateSchema(input);
 
@@ -81,7 +79,7 @@ exports.delete = function(req, res) {
         input.fields = JSON.parse(req.query.fields);
 
         entityHandler.deleteField( input, function(error, result) {
-            if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+            if( error ) { return sendError(res, error); }
             var output = { _id: input._id };
             res.json(output);
         });
@@ -89,7 +87,7 @@ exports.delete = function(req, res) {
         input.method = 'delete';
 
         entityHandler.deleteEntity( input, function(error, result) {
-            if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+            if( error ) { return sendError(res, error); }
             var output = { _id: input._id };
             res.json(output);
         });
@@ -118,7 +116,7 @@ exports.batch = function(req, res) {
 
 
 			entityHandler.createEntity(input, function(error, result) {
-				if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+                if( error ) { return sendError(res, error); }
 
 
 				output._id = input.entity._id;
@@ -137,7 +135,7 @@ exports.batch = function(req, res) {
 
 
 			entityHandler.updateEntity(input, function(error, result) {
-				if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+                if( error ) { return sendError(res, error); }
 
 				output._id = input.entity._id;
 				output.updateAt = input.entity.updateAt;
@@ -152,7 +150,7 @@ exports.batch = function(req, res) {
 			var output = {};
 
 			entityHandler.deleteEntity( input, function(error, result) {
-				if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+                if( error ) { return sendError(res, error); }
 
 				next(error, output);
 			});
@@ -168,6 +166,8 @@ exports.deleteClass = function(req, res) {
     input.method = 'deleteClass';
 
     entityHandler.deleteClass(input, function (error, result) {
+        if( error ) { return sendError(res, error); }
+
        schemaHandler.deleteSchema(input);
        res.json({});
     });
