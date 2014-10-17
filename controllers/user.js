@@ -7,7 +7,7 @@ var schemaHandler = require('../handlers/schema');
 
 var uuid = require('uuid');
 
-var UserClass = 'User';
+var UserClass = 'Users';
 
 
 exports.create = function (req, res) {

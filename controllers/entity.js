@@ -38,7 +38,6 @@ exports.create = function(req, res) {
 
 		res.json(output);
 	});
-
 };
 
 // /classes/<className>/<_id>		PUT	Updating Entitys

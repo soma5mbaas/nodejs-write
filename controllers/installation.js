@@ -8,7 +8,7 @@ var schemaHandler = require('../handlers/schema');
 
 var uuid = require('uuid');
 
-var InstallationClass = 'Installation';
+var InstallationClass = 'Installations';
 
 
 exports.create = function (req, res) {
