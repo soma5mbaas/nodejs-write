@@ -14,14 +14,14 @@ router.delete( '/classes/:classname', entity.deleteClass);
 router.post('/batch', entity.batch);
 
 ////Installation
-router.post('/installation', installation.create);
-router.put('/installation/:_id', installation.update);
-router.delete('/installation/:_id', installation.delete);
+//router.post('/installation', installation.create);
+//router.put('/installation/:_id', installation.update);
+//router.delete('/installation/:_id', installation.delete);
 
 //User
-router.post('/user', user.create);
-router.put('/user/:_id', user.update);
-router.delete('/user/:_id', user.delete);
+//router.post('/user', user.create);
+//router.put('/user/:_id', user.update);
+//router.delete('/user/:_id', user.delete);
 
 
 module.exports = router;
