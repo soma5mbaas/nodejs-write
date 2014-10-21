@@ -8,6 +8,9 @@ var routeV1 = require('./routes/routeV1');
 var token = require('./utils/token');
 var cors = require('cors');
 
+var store = require('haru-nodejs-store');
+var storeConfig = require('./config').store;
+
 
 var app = express();
 
@@ -17,6 +20,7 @@ app.use(cors());
 
 // app.use(token.checkToken());
 
+store.connect(storeConfig);
 
 app.use('/', index);
 
