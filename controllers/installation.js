@@ -19,7 +19,7 @@ exports.create = function (req, res) {
     // Installation Entity
     input.entity = req.body;
     input.entity._id = input._id = uuid();
-    input.entity.createAt = input.entity.updateAt = input.timestamp;
+    input.entity.createdAt = input.entity.updatedAt = input.timestamp;
     input.class = InstallationClass;
 
     entityHandler.createEntity(input, function (error, result) {
@@ -29,8 +29,8 @@ exports.create = function (req, res) {
 
         var output = {};
         output._id = input.entity._id;
-        output.createAt = input.entity.createAt;
-        output.updateAt = input.entity.updateAt;
+        output.createdAt = input.entity.createdAt;
+        output.updatedAt = input.entity.updatedAt;
 
         res.json(output);
     });
@@ -44,7 +44,7 @@ exports.update = function(req, res) {
 
     // Installation Entity
     input.entity = req.body;
-    input.entity.updateAt = input.timestamp;
+    input.entity.updatedAt = input.timestamp;
     input.class = InstallationClass
 
     entityHandler.updateEntity(input, function(error, result) {
@@ -54,7 +54,7 @@ exports.update = function(req, res) {
 
         var output = {};
         output._id = input.entity._id;
-        output.updateAt = input.entity.updateAt;
+        output.updatedAt = input.entity.updatedAt;
 
         res.json(output);
     });

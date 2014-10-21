@@ -1,4 +1,6 @@
 var util = require('haru-nodejs-util');
+var _ = require('underscore');
+
 var getHeader = util.common.getHeader;
 var sendError = util.common.sendError;
 
@@ -24,7 +26,7 @@ exports.create = function(req, res) {
 	// Entity
 	input.entity = req.body;
 	input.entity._id = input._id = uuid();
-	input.entity.createAt = input.entity.updateAt = input.timestamp;
+	input.entity.createdAt = input.entity.updatedAt = input.timestamp;
 
 	entityHandler.createEntity(input, function(error, result) {
 		if( error ) { return sendError(res, error); }
@@ -33,8 +35,8 @@ exports.create = function(req, res) {
 
 		var output = {};
 		output._id = input.entity._id;
-		output.createAt = input.entity.createAt;
-		output.updateAt = input.entity.updateAt;
+		output.createdAt = input.entity.createdAt;
+		output.updatedAt = input.entity.updatedAt;
 
 		res.json(output);
 	});
@@ -45,11 +47,9 @@ exports.update = function(req, res) {
 	// Header
 	var input = getHeader(req);
 
-	input.method = 'update';
-
 	// Entity
 	input.entity = req.body;
-	input.entity.updateAt = input.timestamp;
+	input.entity.updatedAt = input.timestamp;
 
 
 	entityHandler.updateEntity(input, function(error, result) {
@@ -59,7 +59,7 @@ exports.update = function(req, res) {
 
 		var output = {};
 		output._id = input.entity._id;
-		output.updateAt = input.entity.updateAt;
+		output.updatedAt = input.entity.updatedAt;
 
 		res.json(output);
 	});
@@ -71,27 +71,22 @@ exports.delete = function(req, res) {
 	// Header
 	var input = getHeader(req);
 
-
-
-    if( req.query.fields ) {
-        input.method = 'deleteFields';
-        input.fields = JSON.parse(req.query.fields);
+    if( req.body.fields ) {
+        input.fields = req.body.fields;
 
         entityHandler.deleteField( input, function(error, result) {
             if( error ) { return sendError(res, error); }
+
             var output = { _id: input._id };
             res.json(output);
         });
     } else {
-        input.method = 'delete';
-
         entityHandler.deleteEntity( input, function(error, result) {
             if( error ) { return sendError(res, error); }
             var output = { _id: input._id };
             res.json(output);
         });
     }
-
 };
 
 exports.batch = function(req, res) {
@@ -109,7 +104,7 @@ exports.batch = function(req, res) {
 
 		if( input.method === 'create' ) {
 			input.entity._id = input._id = uuid();
-			input.entity.createAt = input.entity.updateAt = input.timestamp;
+			input.entity.createdAt = input.entity.updatedAt = input.timestamp;
 
 			var output = {};
 
@@ -119,15 +114,15 @@ exports.batch = function(req, res) {
 
 
 				output._id = input.entity._id;
-				output.createAt = input.entity.createAt;
-				output.updateAt = input.entity.updateAt;
+				output.createdAt = input.entity.createdAt;
+				output.updatedAt = input.entity.updatedAt;
 
 				schemaHandler.createSchema(input);
 
 				next(error, output);
 			});
 		} else if( input.method === 'update' ) {
-			input.entity.updateAt = input.timestamp;
+			input.entity.updatedAt = input.timestamp;
 			input._id = request._id;
 
 			var output = {};
@@ -137,7 +132,7 @@ exports.batch = function(req, res) {
                 if( error ) { return sendError(res, error); }
 
 				output._id = input.entity._id;
-				output.updateAt = input.entity.updateAt;
+				output.updatedAt = input.entity.updatedAt;
 
 				schemaHandler.updateSchema(input);
 
@@ -159,15 +154,24 @@ exports.batch = function(req, res) {
 	});
 };
 
+
 exports.deleteClass = function(req, res) {
     var input = getHeader(req);
 
-    input.method = 'deleteClass';
+    if(req.body.column) {
+        input.column = req.body.column;
+        entityHandler.deleteColumn(input, function (error, result) {
+            if( error ) { return sendError(res, error); }
 
-    entityHandler.deleteClass(input, function (error, result) {
-        if( error ) { return sendError(res, error); }
+            schemaHandler.deleteColumnSchema(input);
+            res.json({});
+        });
+    } else {
+        entityHandler.deleteClass(input, function (error, result) {
+            if( error ) { return sendError(res, error); }
 
-       schemaHandler.deleteSchema(input);
-       res.json({});
-    });
+            schemaHandler.deleteSchema(input);
+            res.json({});
+        });
+    }
 };
