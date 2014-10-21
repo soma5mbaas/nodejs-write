@@ -9,8 +9,11 @@ var user = require('../controllers/user');
 // Entity
 router.post( '/classes/:classname', entity.create );
 router.put( '/classes/:classname/:_id', entity.update );
-router.delete( '/classes/:classname/:_id', entity.delete );
-router.delete( '/classes/:classname', entity.deleteClass);
+
+router.delete( '/classes/:classname/:_id', entity.delete ); // delete entity, delete fields
+
+router.delete( '/classes/:classname', entity.deleteClass);  // delete class, delete column
+
 router.post('/batch', entity.batch);
 
 ////Installation
