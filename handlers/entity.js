@@ -12,8 +12,23 @@ exports.createEntity = function(input, callback) {
     var className = input.class;
     var applicationId = input.applicationId;
     var entity = input.entity;
-
+    var isNewClass = false;
     async.series([
+        function exitsClass(callback) {
+            store.get('public').sismember(keys.classesKey(applicationId), className,function(error, results) {
+                if( error ) { return callback(error, results); }
+
+                isNewClass = !Boolean(results);
+                callback(error, results);
+            });
+        },
+        function addClass(callback) {
+            if( isNewClass ) {
+                store.get('public').sadd(keys.classesKey(applicationId), className, callback);
+            } else {
+                callback(null,null);
+            }
+        },
         function createMongoDB(callback){
             store.get('mongodb').insert(keys.collectionKey(className, applicationId), entity, callback);
         },
@@ -24,6 +39,10 @@ exports.createEntity = function(input, callback) {
                 .exec(callback);
         }
     ], function done(error, results) {
+        if( isNewClass ) {
+            store.get('mongodb').addShardCollection(keys.collectionKey(className, applicationId));
+        }
+        
         callback(error, results);
     });
 };
