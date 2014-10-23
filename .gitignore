@@ -3,3 +3,4 @@ config.json
 *.log
 node_modules
 *.jmx
+.idea
