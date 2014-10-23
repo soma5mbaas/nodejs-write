@@ -17,7 +17,7 @@
     "debug": "~0.7.4",
     "domain": "0.0.0",
     "express": "~4.2.0",
-    "haru-nodejs-store": "0.0.17",
+    "haru-nodejs-store": "0.0.19",
     "haru-nodejs-util": "0.0.27",
     "underscore": "^1.7.0",
     "uuid": "^1.4.1",
