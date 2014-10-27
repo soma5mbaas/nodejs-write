@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 
 var entity = require('../controllers/entity');
+var config = require('../controllers/config');
+
 var installation = require('../controllers/installation');
 var user = require('../controllers/user');
 
@@ -26,11 +28,10 @@ router.post('/batch', entity.batch);
 //router.put('/user/:_id', user.update);
 //router.delete('/user/:_id', user.delete);
 
-// Data browser
-//router.put(''); // removeAll
-//router.put(''); // createClass
-//router.put(''); // deleteMultiRow
-
+// config
+router.post('/config', config.create);
+router.put('/config', config.update);
+router.delete('/config', config.delete);
 
 module.exports = router;
 
