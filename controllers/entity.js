@@ -82,13 +82,14 @@ exports.update = function(req, res) {
 	});
 
 };
-
 // /classes/<className>/<_id>		DELETE	Deleting Entitys
 exports.delete = function(req, res) {
 	// Header
 	var input = getHeader(req);
 
     if( req.body.fields ) {
+		// delete fields
+
         input.fields = req.body.fields;
 
         entityHandler.deleteField( input, function(error, result) {
@@ -176,6 +177,7 @@ exports.deleteClass = function(req, res) {
     var input = getHeader(req);
 
     if(req.body.column) {
+		// delete column
         input.column = req.body.column;
         entityHandler.deleteColumn(input, function (error, result) {
             if( error ) { return sendError(res, error); }
@@ -183,7 +185,18 @@ exports.deleteClass = function(req, res) {
             schemaHandler.deleteColumnSchema(input);
             res.json({});
         });
-    } else {
+    }  else if( req.body.where) {
+		// delete quey
+
+		input.where = req.body.where;
+
+		entityHandler.deleteQuery(input, function(error, results) {
+			if( error ) { return sendError(res, error); }
+
+			res.json({});
+		});
+	} else {
+		// delete class
         entityHandler.deleteClass(input, function (error, result) {
             if( error ) { return sendError(res, error); }
 
