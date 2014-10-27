@@ -106,7 +106,7 @@ exports.deleteClass = function(input, callback) {
         function deleteMongoDB(callback){
             store.get('mongodb').drop(keys.collectionKey(className, applicationId), callback);
         },
-        function deleteRedis(callback){
+        function deleteRedisEntity(callback){
             var total = 0;
             var maxRow = 5000;
 
@@ -133,6 +133,10 @@ exports.deleteClass = function(input, callback) {
 
             process.nextTick(deleteClass);
 
+        }, function deleteClass(callback) {
+            store.get('public').srem(keys.classesKey(applicationId), className, callback);
+        }, function deleteKetSet(callback) {
+            store.get('service').del(keys.entityKey(className, applicationId), callback);
         }
     ], function done(error, results) {
         callback(error, results);
@@ -235,3 +239,29 @@ exports.deleteField = function(input, callback) {
     });
     
 };
+
+//var total = 0;
+//var maxRow = 5000;
+//
+//var deleteClass = function() {
+//    store.get('service').multi()
+//        .zrange(keys.entityKey(className, applicationId), 0, maxRow-1)
+//        .zremrangebyrank(keys.entityKey(className, applicationId), 0, maxRow-1)
+//        .exec(function(error, results) {
+//            var multi = store.get('service').multi();
+//            total += results[1];
+//
+//            for(var i = 0; i < results[0].length; i++) {
+//                multi.del(keys.entityDetail(className, results[0][i], applicationId))
+//            }
+//            multi.exec(function (error, result) {
+//                if( results[1] === maxRow ) {
+//                    return process.nextTick(deleteClass);
+//                }
+//
+//                return callback( null, total );
+//            });
+//        });
+//};
+//
+//process.nextTick(deleteClass);
