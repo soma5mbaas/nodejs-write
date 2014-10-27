@@ -130,10 +130,9 @@ exports.deleteClass = function(input, callback) {
                         });
                     });
             };
-
             process.nextTick(deleteClass);
 
-        }
+        },
     ], function done(error, results) {
         callback(error, results);
     });
@@ -234,4 +233,60 @@ exports.deleteField = function(input, callback) {
         callback(error, results);
     });
     
+};
+
+exports.deleteQuery = function(input, callback) {
+    var className = input.class;
+    var applicationId = input.applicationId;
+
+    var idList = [];
+    var entityKeyList = [];
+
+    var deleteIdMulti;
+    var deleteEntityMulti;
+
+    async.series([
+        function doQuery(callback) {
+            store.get('mongodb').find(keys.collectionKey(className, applicationId), input.where, function(error, results) {
+                if( error ) { return callback(error, results); }
+
+                if(results.length > 0) {
+                    deleteIdMulti = store.get('service').multi();
+                    deleteEntityMulti = store.get('service').multi();
+                }
+
+                for(var i = 0; i < results.length; i++ ) {
+
+                    deleteEntityMulti.del(keys.entityDetail(className, results[i]._id, applicationId));
+
+                    idList.push(results[i]._id);
+                    entityKeyList.push(keys.entityDetail(className, results[i]._id, applicationId));
+                }
+
+                callback(error, null);
+            });
+        },
+        function deleteDB(callback){
+            if( idList.length < 1 ) { return callback(null, null); }
+
+
+            async.parallel([
+                function deleteMongoDb(callback) {
+                    store.get('mongodb').remove(keys.collectionKey(className, applicationId), input.where, callback);
+                },
+                function deleteRedisKey(callback) {
+
+                },
+                function deleteRedisDetail(callback) {
+
+                }
+            ], function done(error, results) {
+            
+            });
+        
+        },
+    ], function done(error, results) {
+    
+    });
+
 };

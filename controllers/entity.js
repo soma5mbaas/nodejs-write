@@ -89,6 +89,8 @@ exports.delete = function(req, res) {
 	var input = getHeader(req);
 
     if( req.body.fields ) {
+		// delete fields
+
         input.fields = req.body.fields;
 
         entityHandler.deleteField( input, function(error, result) {
@@ -97,7 +99,15 @@ exports.delete = function(req, res) {
             var output = { _id: input._id };
             res.json(output);
         });
-    } else {
+    } else if( req.body.where) {
+		// delete quey
+
+		input.where = req.body.where;
+
+		entityHandler.deleteQuery(input, function(error, results) {
+
+		});
+	} else {
         entityHandler.deleteEntity( input, function(error, result) {
             if( error ) { return sendError(res, error); }
             var output = { _id: input._id };
