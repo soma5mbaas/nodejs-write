@@ -8,38 +8,55 @@ var token = require('../utils/token');
 
 var entityHandler = require('../handlers/entity');
 var schemaHandler = require('../handlers/schema');
+var classHandler = require('../handlers/class');
+
 
 var isEmptyObject = require('haru-nodejs-util').common.isEmptyObject;
 
 
 var uuid = require('uuid');
 var async = require('async');
+var _ = require('underscore');
+
 
 // /classes/<className>					POST	Creating Entitys
 exports.create = function(req, res) {
 	// Header
 	var input = getHeader(req);
 
-	input.method = 'create';
 
+	if( !_.isEmpty(req.body) ) {
+		// create Entity
 
-	// Entity
-	input.entity = req.body;
-	input.entity._id = input._id = uuid();
-	input.entity.createdAt = input.entity.updatedAt = input.timestamp;
+		input.entity = req.body;
+		input.entity._id = input._id = uuid();
+		input.entity.createdAt = input.entity.updatedAt = input.timestamp;
 
-	entityHandler.createEntity(input, function(error, result) {
-		if( error ) { return sendError(res, error); }
+		entityHandler.createEntity(input, function(error, result) {
+			if( error ) { return sendError(res, error); }
 
-		schemaHandler.createSchema(input);
+			schemaHandler.createSchema(input);
 
-		var output = {};
-		output._id = input.entity._id;
-		output.createdAt = input.entity.createdAt;
-		output.updatedAt = input.entity.updatedAt;
+			var output = {};
+			output._id = input.entity._id;
+			output.createdAt = input.entity.createdAt;
+			output.updatedAt = input.entity.updatedAt;
 
-		res.json(output);
-	});
+			res.json(output);
+		});
+	} else {
+		// create Class
+
+		classHandler.create(input, function(error, results) {
+			if( error ) { return sendError(res, error); }
+
+			input.entity = {};
+			schemaHandler.createSchema(input);
+
+			res.json( {success: true} );
+		});
+	}
+
 };
 
 // /classes/<className>/<_id>		PUT	Updating Entitys

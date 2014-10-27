@@ -11,10 +11,10 @@ router.post( '/classes/:classname', entity.create );
 router.put( '/classes/:classname/:_id', entity.update );
 
 router.delete( '/classes/:classname/:_id', entity.delete ); // delete entity, delete fields
-
 router.delete( '/classes/:classname', entity.deleteClass);  // delete class, delete column
 
 router.post('/batch', entity.batch);
+
 
 ////Installation
 //router.post('/installation', installation.create);
@@ -25,6 +25,11 @@ router.post('/batch', entity.batch);
 //router.post('/user', user.create);
 //router.put('/user/:_id', user.update);
 //router.delete('/user/:_id', user.delete);
+
+// Data browser
+//router.put(''); // removeAll
+//router.put(''); // createClass
+//router.put(''); // deleteMultiRow
 
 
 module.exports = router;
