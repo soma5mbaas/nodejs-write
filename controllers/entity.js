@@ -4,8 +4,6 @@ var _ = require('underscore');
 var getHeader = util.common.getHeader;
 var sendError = util.common.sendError;
 
-var token = require('../utils/token');
-
 var entityHandler = require('../handlers/entity');
 var schemaHandler = require('../handlers/schema');
 var classHandler = require('../handlers/class');
