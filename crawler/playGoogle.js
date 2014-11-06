@@ -19,8 +19,7 @@ exports.requestTotal = function(applicationId, packageName, callback) {
         var $ = parser.load(body);
 
         var total = $('meta[itemprop=ratingCount]').attr('content');
-        console.log('play : ', total);
-        
+
         callback(error, total);
     });
 };

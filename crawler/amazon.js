@@ -6,16 +6,12 @@ var config = require('./amazon.json');
 var _ = require('underscore');
 var parser = require('whacko');
 var util = require('util');
-var async = require('async');
-var moment = require('moment');
-var store = require('haru-nodejs-store');
 
 
 
 exports.requestTotal = function(applicationId, packageName, callback) {
     _requestTotal(packageName, function(error, total) {
         // TODO 현재 100개 제한.
-        console.log('amazon : ', total);
         callback(error, total);
     });
 };

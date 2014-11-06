@@ -25,6 +25,7 @@ exports.fetch = function(input, callback) {
         if( typeof crawler[market] === 'object'){
             _reviewCount(input.applicationId, option, function(error, results) {
                 var pageCount = crawler[market].calcPageCount(results);
+                //pageCount=1;
 
                 for( var i = 1; i <= pageCount; i++ ) {
                     option['locations'].forEach(function(location) {
@@ -35,6 +36,7 @@ exports.fetch = function(input, callback) {
                             packageName: option.packageName,
                             applicationId: input.applicationId
                         };
+
                         var priority = i <= 10 ? 0 : 9;
                         rabbitmq.publish('crawler',msg, {priority: priority});
                     });
