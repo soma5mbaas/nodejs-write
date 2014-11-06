@@ -21,8 +21,11 @@
     "haru-nodejs-analysis": "^1.0.0",
     "haru-nodejs-store": "0.0.23",
     "haru-nodejs-util": "0.0.33",
+    "moment": "^2.8.3",
+    "request": "^2.47.0",
     "underscore": "^1.7.0",
     "uuid": "^1.4.1",
+    "whacko": "^0.17.1",
     "winston": "^0.7.3"
   },
   "main": "app.js",

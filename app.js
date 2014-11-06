@@ -19,7 +19,7 @@ var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cors());
-app.use(analysis(config.mqueue));
+app.use(analysis({analysis: config.mqueue.analysis}));
 
 
 store.connect(config.store);

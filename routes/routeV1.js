@@ -3,6 +3,7 @@ var router = express.Router();
 
 var entity = require('../controllers/entity');
 var config = require('../controllers/config');
+var review = require('../controllers/review');
 
 var installation = require('../controllers/installation');
 var user = require('../controllers/user');
@@ -32,6 +33,9 @@ router.post('/batch', entity.batch);
 router.post('/config', config.create);
 router.put('/config', config.update);
 router.delete('/config', config.delete);
+
+// review Crawler
+router.post('/reviews/fetch', review.fetch);
 
 module.exports = router;
 
