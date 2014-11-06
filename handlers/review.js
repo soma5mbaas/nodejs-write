@@ -30,18 +30,18 @@ exports.fetch = function(input, callback) {
 
         if( typeof crawler[market] === 'object'){
             _reviewCount(input.applicationId, option, function(error, results) {
-                //crawler[market].crawling(input.applicationId, option.packageName, results);
                 var pageCount = crawler[market].calcPageCount(results);
 
                 for( var i = 1; i <= pageCount; i++ ) {
-                    var msg  ={
+                    var msg  = {
                         market: market,
                         page: i,
                         location: 'ko',
                         packageName: option.packageName,
                         applicationId: input.applicationId
                     };
-                    rabbitmq.publish('crawler',msg);
+                    var priority = i <= 10 ? 0 : 9;
+                    rabbitmq.publish('crawler',msg, {priority: priority});
                 }
 
                 output[market] = results;
