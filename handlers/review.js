@@ -22,26 +22,22 @@ exports.fetch = function(input, callback) {
 
         var output = {};
 
-        option['location'].forEach(function(location) {
-            console.log(location);
-
-        });
-
-
         if( typeof crawler[market] === 'object'){
             _reviewCount(input.applicationId, option, function(error, results) {
                 var pageCount = crawler[market].calcPageCount(results);
 
                 for( var i = 1; i <= pageCount; i++ ) {
-                    var msg  = {
-                        market: market,
-                        page: i,
-                        location: 'ko',
-                        packageName: option.packageName,
-                        applicationId: input.applicationId
-                    };
-                    var priority = i <= 10 ? 0 : 9;
-                    rabbitmq.publish('crawler',msg, {priority: priority});
+                    option['locations'].forEach(function(location) {
+                        var msg  = {
+                            market: market,
+                            page: i,
+                            location: location,
+                            packageName: option.packageName,
+                            applicationId: input.applicationId
+                        };
+                        var priority = i <= 10 ? 0 : 9;
+                        rabbitmq.publish('crawler',msg, {priority: priority});
+                    });
                 }
 
                 output[market] = results;
