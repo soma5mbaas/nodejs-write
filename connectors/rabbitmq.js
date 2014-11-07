@@ -56,8 +56,6 @@ RabbitMQ.prototype.publish = function(qname, data, option, callback) {
                     log.debug('[%d] method : %s', process.pid, strData );
 
                 channel.sendToQueue(qname, new Buffer(strData), option);
-                channel.close();
-
                 callback( error, null );
             }
         ],
@@ -69,5 +67,14 @@ RabbitMQ.prototype.publish = function(qname, data, option, callback) {
             }
         });
 };
+
+RabbitMQ.prototype.close = function(qname) {
+    if( this.connection[qname] ) {
+        this.connection[qname].close();
+        this.connection[qname] = null;
+    }
+};
+
+
 
 module.exports = RabbitMQ;
