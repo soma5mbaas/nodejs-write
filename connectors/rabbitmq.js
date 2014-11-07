@@ -23,7 +23,7 @@ RabbitMQ.prototype.connect = function() {
 
 };
 
-RabbitMQ.prototype.publish = function(qname, data, callback) {
+RabbitMQ.prototype.publish = function(qname, data, option, callback) {
     var self = this;
 
     async.waterfall([
@@ -55,7 +55,7 @@ RabbitMQ.prototype.publish = function(qname, data, callback) {
                 if( !data.method )
                     log.debug('[%d] method : %s', process.pid, strData );
 
-                channel.sendToQueue(qname, new Buffer(strData));
+                channel.sendToQueue(qname, new Buffer(strData), option);
                 channel.close();
 
                 callback( error, null );
