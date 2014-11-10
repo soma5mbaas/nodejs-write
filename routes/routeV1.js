@@ -4,6 +4,8 @@ var router = express.Router();
 var entity = require('../controllers/entity');
 var config = require('../controllers/config');
 var review = require('../controllers/review');
+var push = require('../controllers/push');
+
 
 var installation = require('../controllers/installation');
 var user = require('../controllers/user');
@@ -36,6 +38,9 @@ router.delete('/config', config.delete);
 
 // review Crawler
 router.post('/reviews/fetch', review.fetch);
+
+// push
+router.post('/push', push.push);
 
 module.exports = router;
 
