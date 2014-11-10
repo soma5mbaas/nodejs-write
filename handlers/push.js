@@ -70,7 +70,21 @@ exports.pushNotification = function(options, notification, callback) {
                 callback(null, 0);
             } else {
                 // installation query count
-                store.get('mongodb').findCount(installationCollection,  options.where.installations, callback);
+                store.get('mongodb').findCount(installationCollection,  options.where.installations, function(error, count) {
+                    var times = (count /QueryLimit) + 1;
+                    for( var i = 1; i <= times; i++) {
+                        var page = { pageSize: QueryLimit, pageNumber: i};
+
+                        var msg = {
+                            page: page,
+                            options: options,
+                            notification: notification
+                        };
+
+                        rabbitmq.publish('push', msg);
+                    }
+                    callback(error, count)
+                });
             }
         }
     ], function done(error, results) {
