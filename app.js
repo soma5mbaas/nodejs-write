@@ -13,9 +13,6 @@ var config = require('./config');
 
 var app = express();
 
-
-
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cors());

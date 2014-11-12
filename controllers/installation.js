@@ -23,7 +23,7 @@ exports.create = function (req, res) {
     input.class = InstallationClass;
 
     entityHandler.createEntity(input, function (error, result) {
-        if(error) { return sendError(res, errorCode.OTHER_CAUSE); }
+        if( error ) { return sendError(res, error, log, 'error'); }
 
         schemaHandler.createInstallationSchema(input);
 
@@ -48,7 +48,7 @@ exports.update = function(req, res) {
     input.class = InstallationClass
 
     entityHandler.updateEntity(input, function(error, result) {
-        if( error ) return sendError(res, errorCode.OTHER_CAUSE);
+        if( error ) { return sendError(res, error, log, 'error'); }
 
         schemaHandler.updateSchema(input);
 
@@ -69,7 +69,7 @@ exports.delete = function(req, res) {
     input.class = InstallationClass;
 
     entityHandler.deleteEntity( input, function(error, result) {
-        if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+        if( error ) { return sendError(res, error, log, 'error'); }
 
         var output = { _id: input._id };
 

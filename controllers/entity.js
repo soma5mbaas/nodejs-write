@@ -31,7 +31,7 @@ exports.create = function(req, res) {
 		input.entity.createdAt = input.entity.updatedAt = input.timestamp;
 
 		entityHandler.createEntity(input, function(error, result) {
-			if( error ) { return sendError(res, error); }
+			if( error ) { return sendError(res, error, log, 'error'); }
 
 			schemaHandler.createSchema(input);
 
@@ -46,7 +46,7 @@ exports.create = function(req, res) {
 		// create Class
 
 		classHandler.create(input, function(error, results) {
-			if( error ) { return sendError(res, error); }
+			if( error ) { return sendError(res, error, log, 'error'); }
 
 			input.entity = {};
 			schemaHandler.createSchema(input);
@@ -68,7 +68,7 @@ exports.update = function(req, res) {
 
 
 	entityHandler.updateEntity(input, function(error, result) {
-        if( error ) { return sendError(res, error); }
+		if( error ) { return sendError(res, error, log, 'error'); }
 
 		schemaHandler.updateSchema(input);
 
@@ -91,14 +91,14 @@ exports.delete = function(req, res) {
         input.fields = req.body.fields;
 
         entityHandler.deleteField( input, function(error, result) {
-            if( error ) { return sendError(res, error); }
+			if( error ) { return sendError(res, error, log, 'error'); }
 
             var output = { _id: input._id };
             res.json(output);
         });
     } else {
         entityHandler.deleteEntity( input, function(error, result) {
-            if( error ) { return sendError(res, error); }
+			if( error ) { return sendError(res, error, log, 'error'); }
             var output = { _id: input._id };
             res.json(output);
         });
@@ -126,7 +126,7 @@ exports.batch = function(req, res) {
 
 
 			entityHandler.createEntity(input, function(error, result) {
-                if( error ) { return sendError(res, error); }
+				if( error ) { return sendError(res, error, log, 'error'); }
 
 
 				output._id = input.entity._id;
@@ -145,7 +145,7 @@ exports.batch = function(req, res) {
 
 
 			entityHandler.updateEntity(input, function(error, result) {
-                if( error ) { return sendError(res, error); }
+				if( error ) { return sendError(res, error, log, 'error'); }
 
 				output._id = input.entity._id;
 				output.updatedAt = input.entity.updatedAt;
@@ -160,7 +160,7 @@ exports.batch = function(req, res) {
 			var output = {};
 
 			entityHandler.deleteEntity( input, function(error, result) {
-                if( error ) { return sendError(res, error); }
+				if( error ) { return sendError(res, error, log, 'error'); }
 
 				next(error, output);
 			});
@@ -178,7 +178,7 @@ exports.deleteClass = function(req, res) {
 		// delete column
         input.column = req.body.column;
         entityHandler.deleteColumn(input, function (error, result) {
-            if( error ) { return sendError(res, error); }
+			if( error ) { return sendError(res, error, log, 'error'); }
 
             schemaHandler.deleteColumnSchema(input);
             res.json({});
@@ -189,14 +189,14 @@ exports.deleteClass = function(req, res) {
 		input.where = req.body.where;
 
 		entityHandler.deleteQuery(input, function(error, results) {
-			if( error ) { return sendError(res, error); }
+			if( error ) { return sendError(res, error, log, 'error'); }
 
 			res.json({});
 		});
 	} else {
 		// delete class
         entityHandler.deleteClass(input, function (error, result) {
-            if( error ) { return sendError(res, error); }
+			if( error ) { return sendError(res, error, log, 'error'); }
 
             schemaHandler.deleteSchema(input);
             res.json({});

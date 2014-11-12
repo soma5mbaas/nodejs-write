@@ -14,7 +14,7 @@ exports.push = function(req, res) {
     if( !req.body.installations && !req.body.users ) { return sendError(res, new Error('')); }
 
     pushHandelr.pushNotification(options, notification, function(error, results) {
-        if( error ) { return sendError(res, error); }
+        if( error ) { return sendError(res, error, log, 'error'); }
 
         res.json({total: results});
     });

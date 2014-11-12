@@ -12,7 +12,7 @@ exports.create = function(req, res) {
     input.config = req.body;
 
     configHandler.create(input, function(error, results) {
-        if( error ) { return sendError(res, error); }
+        if( error ) { return sendError(res, error, log, 'error'); }
 
         res.json({success: true});
     });
@@ -24,9 +24,7 @@ exports.delete = function(req, res) {
     input.fields = req.body.fields;
 
     configHandler.delete(input, function(error, results) {
-        console.log(error);
-
-        if( error ) { return sendError(res, error); }
+        if( error ) { return sendError(res, error, log, 'error'); }
 
         res.json({success: true});
     });
@@ -38,7 +36,7 @@ exports.update = function(req, res) {
     input.config = req.body;
 
     configHandler.update(input, function(error, results) {
-        if( error ) { return sendError(res, error); }
+        if( error ) { return sendError(res, error, log, 'error'); }
 
         res.json({success: true});
     });

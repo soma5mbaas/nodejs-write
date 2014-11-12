@@ -22,7 +22,7 @@ exports.create = function (req, res) {
     input.class = UserClass;
 
     entityHandler.createEntity(input, function (error, result) {
-        if(error) { return sendError(res, errorCode.OTHER_CAUSE); }
+        if( error ) { return sendError(res, error, log, 'error'); }
 
         schemaHandler.createUserSchema(input);
 
@@ -47,7 +47,7 @@ exports.update = function(req, res) {
     input.class = UserClass;
 
     entityHandler.updateEntity(input, function(error, result) {
-        if( error ) return sendError(res, errorCode.OTHER_CAUSE);
+        if( error ) { return sendError(res, error, log, 'error'); }
 
         schemaHandler.updateUserSchema(input);
 
@@ -68,7 +68,7 @@ exports.delete = function(req, res) {
     input.class = UserClass;
 
     entityHandler.deleteEntity( input, function(error, result) {
-        if( error ) { return sendError(res, errorCode.OTHER_CAUSE); }
+        if( error ) { return sendError(res, error, log, 'error'); }
 
         var output = { _id: input._id };
 
