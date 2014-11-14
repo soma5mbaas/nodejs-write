@@ -9,7 +9,6 @@ var UsersClass = 'Users';
 var QueryLimit = 10000;
 
 var RabbitMq = require('../connectors/rabbitmq');
-
 var rabbitmq = new RabbitMq({push: require('../config').mqueue.push});
 
 exports.pushNotification = function(options, notification, callback) {

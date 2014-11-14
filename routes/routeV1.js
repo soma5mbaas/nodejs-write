@@ -5,6 +5,8 @@ var entity = require('../controllers/entity');
 var config = require('../controllers/config');
 var review = require('../controllers/review');
 var push = require('../controllers/push');
+var monetization = require('../controllers/monetization');
+
 
 
 var installation = require('../controllers/installation');
@@ -41,6 +43,9 @@ router.post('/reviews/fetch', review.fetch);
 
 // push
 router.post('/push', push.push);
+
+// monetization
+router.post('/monetization', monetization.create);
 
 module.exports = router;
 
