@@ -1,16 +1,14 @@
 var _ = require('underscore');
 var async = require('async');
 
-var crawler = require('../crawler');
-
 var RabbitMq = require('../connectors/rabbitmq');
 var rabbitmq = new RabbitMq({crawler: require('../config').mqueue.crawler});
 
+var crawlerConfig = require('../config').crawlerConfig;
 
 exports.fetch = function(input, callback) {
     var options = input.options;
     var markets = Object.keys(options);
-
 
     async.times(markets.length, function(n, next) {
         var market = markets[n];
@@ -18,21 +16,23 @@ exports.fetch = function(input, callback) {
 
         option['market'] = market;
 
-        if( typeof crawler[market] === 'object'){
+        if( crawlerConfig[market] ){
             option['locations'].forEach(function(location) {
-                var msg  = {
-                    market: market,
-                    page: 1,
-                    location: location,
-                    packageName: option.packageName,
-                    applicationId: input.applicationId
-                };
-
-                rabbitmq.publish('crawler',msg, {priority: 0});
+                if( _.contains(crawlerConfig[market], location) ) {
+                    var msg  = {
+                        market: market,
+                        page: 1,
+                        location: location,
+                        packageName: option.packageName,
+                        applicationId: input.applicationId
+                    };
+                    rabbitmq.publish('crawler',msg, {priority: 0});
+                }
             });
-        } else {
-            next(null, null);
         }
+
+        next(null, null);
+
     },function done(error, results) {
         callback(error, {});
     });
