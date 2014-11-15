@@ -164,6 +164,10 @@ exports.batch = function(req, res) {
 
 				next(error, output);
 			});
+		} else if( input.method === 'deleteFields') {
+			next(null, {success: false});
+		} else {
+			next(null, {success: false});
 		}
 	}, function done(error, outputs) {
 		res.json( outputs );
