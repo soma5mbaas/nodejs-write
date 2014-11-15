@@ -28,9 +28,10 @@ exports.pushNotification = function(options, notification, callback) {
         function countInstallations(userCount, callback) {
             if( userCount ){
                 // user , installation join query count
-                var times = (userCount / QueryLimit) + 1;
+                var times = (userCount / QueryLimit);
+
                 async.times(times, function(n, next) {
-                    var page = { pageSize: QueryLimit, pageNumber: n};
+                    var page = { pageSize: QueryLimit, pageNumber: n+1};
                     store.get('mongodb').pagination( userCollection, options.where.users, page,function(error, userList) {
                         if(userList) {
                             var userIds = [];
@@ -71,6 +72,8 @@ exports.pushNotification = function(options, notification, callback) {
                 // installation query count
                 store.get('mongodb').findCount(installationCollection,  options.where.installations, function(error, count) {
                     var times = (count /QueryLimit) + 1;
+                    console.log(times);
+
                     for( var i = 1; i <= times; i++) {
                         var page = { pageSize: QueryLimit, pageNumber: i};
 
