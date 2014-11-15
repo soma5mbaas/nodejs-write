@@ -208,7 +208,7 @@ exports.deleteField = function(input, callback) {
                 callback(error, results);
             });
         },
-        function delteMongoDB(callback){
+        function deleteMongoDB(callback){
             var column = {};
 
             for(var i = 0; i < input.fields.length; i++) {
@@ -220,6 +220,8 @@ exports.deleteField = function(input, callback) {
                 {$unset:column, $set:{updatedAt: input.timestamp}},
                 {multi: false},
                 function(error, results) {
+                    console.log(error, results);
+
                     callback(error, results);
                 });
         },

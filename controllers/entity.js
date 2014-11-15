@@ -87,7 +87,6 @@ exports.delete = function(req, res) {
 
     if( req.body.fields ) {
 		// delete fields
-
         input.fields = req.body.fields;
 
         entityHandler.deleteField( input, function(error, result) {
@@ -165,7 +164,18 @@ exports.batch = function(req, res) {
 				next(error, output);
 			});
 		} else if( input.method === 'deleteFields') {
-			next(null, {success: false});
+			input._id = request._id;
+			input.fields = request.fields;
+
+			var output = {};
+
+			entityHandler.deleteField( input, function(error, result) {
+				if( error ) { return sendError(res, error, log, 'error'); }
+
+				var output = { _id: input._id };
+				next(null, output);
+			});
+
 		} else {
 			next(null, {success: false});
 		}
