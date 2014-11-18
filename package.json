@@ -19,7 +19,7 @@
     "domain": "0.0.0",
     "express": "~4.2.0",
     "haru-nodejs-analysis": "^1.0.0",
-    "haru-nodejs-store": "0.0.34",
+    "haru-nodejs-store": "0.0.37",
     "haru-nodejs-util": "0.0.39",
     "moment": "^2.8.3",
     "querystring": "^0.2.0",
