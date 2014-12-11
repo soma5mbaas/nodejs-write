@@ -3,6 +3,8 @@ var store = require('haru-nodejs-store');
 
 var _ = require('underscore');
 var async = require('async');
+var uid2 = require('uid2');
+const QueryLimit = 5000;
 
 /**
  * TODO
@@ -12,37 +14,41 @@ exports.createEntity = function(input, callback) {
     var className = input.class;
     var applicationId = input.applicationId;
     var entity = input.entity;
-    var isNewClass = false;
-    async.series([
-        function exitsClass(callback) {
-            store.get('public').sismember(keys.classesKey(applicationId), className,function(error, results) {
-                if( error ) { return callback(error, results); }
 
-                isNewClass = !Boolean(results);
-                callback(error, results);
+    var options = {};
+
+    async.series([
+        function createEntityId(callback) {
+            _createEntityId(input.timestamp, function(error, id, shardKey) {
+                input._id = entity._id = id;
+                input.shardKey = shardKey;
+
+                callback(error);
             });
         },
-        function addClass(callback) {
-            if( isNewClass ) {
-                store.get('public').sadd(keys.classesKey(applicationId), className, callback);
-            } else {
-                callback(null,null);
-            }
+        function addMetaDataToPublic(callback) {
+            store.get('public').multi()
+                .sadd(keys.classesKey(applicationId), className)
+                .zadd(keys.entityKey(className, applicationId), input.timestamp, input._id)
+                .exec(function(error, results) {
+                    options.isNewClass = results[0] === 1;
+                    callback(error);
+                });
         },
-        function createMongoDB(callback){
+        function addShardCollection(callback) {
+            if( options.isNewClass ) {
+                store.get('mongodb').addShardCollection(keys.collectionKey(className, applicationId));
+            }
+
+            callback(null);
+        },
+        function addEntityToMongo(callback) {
             store.get('mongodb').insert(keys.collectionKey(className, applicationId), entity, callback);
         },
-        function createRedis(callback){
-            store.get('service').multi()
-                .hmset(keys.entityDetail(className, input._id, applicationId), entity)
-                .zadd(keys.entityKey(className, applicationId), input.timestamp, input._id)
-                .exec(callback);
+        function addEntityToRedis(callback) {
+            store.get('service').hmset(keys.entityDetail(className, input._id, applicationId), entity, callback, input.shardKey);
         }
     ], function done(error, results) {
-        if( isNewClass ) {
-            store.get('mongodb').addShardCollection(keys.collectionKey(className, applicationId));
-        }
-        
         callback(error, results);
     });
 };
@@ -51,22 +57,24 @@ exports.updateEntity = function(input, callback) {
     var className = input.class;
     var applicationId = input.applicationId;
     var entity = input.entity;
+    var shardKey = _getShardKey(input._id);
 
     async.series([
-        function isExist(callback) {
+        function isExistEntity(callback) {
             store.get('service').hget( keys.entityDetail(className, input._id, applicationId), '_id', function(error, results) {
                 if(results == null) { return callback(errorCode.MISSING_ENTITY_ID, results); }
+
                 callback(error, results);
-            });
+            }, shardKey);
         },
-        function updateMongoDB(callback){
+        function updateEntityToMongoDB(callback){
             store.get('mongodb').update(keys.collectionKey(className, applicationId),{_id: input._id}, {$set: entity}, callback);
         },
-        function updateRedis(callback){
-            store.get('service').multi()
-                .hmset(keys.entityDetail(className, input._id, applicationId), entity)
-                .zadd(keys.entityKey(className, applicationId), input.timestamp, input._id)
-                .exec(callback);
+        function updateEntityToRedis(callback){
+            store.get('service').hmset(keys.entityDetail(className, input._id, applicationId), entity, callback, shardKey);
+        },
+        function updateEntityIdToPublic(callback) {
+            store.get('public').zadd(keys.entityKey(className, applicationId), input.timestamp, input._id, callback);
         }
     ], function done(error, results) {
         callback(error, results);
@@ -76,22 +84,23 @@ exports.updateEntity = function(input, callback) {
 exports.deleteEntity = function(input, callback) {
     var className = input.class;
     var applicationId = input.applicationId;
+    var shardKey = _getShardKey(input._id);
 
     async.series([
-        function isExist(callback) {
+        function isExistEntity(callback) {
             store.get('service').hget( keys.entityDetail(className, input._id, applicationId), '_id', function(error, results) {
                 if(results == null) { return callback(errorCode.MISSING_ENTITY_ID, results); }
                 callback(error, results);
-            });
+            }, shardKey);
         },
-        function deleteMongoDB(callback){
+        function deleteEntityToMongoDB(callback){
             store.get('mongodb').remove(keys.collectionKey(className, applicationId),{_id: input._id}, callback);
         },
-        function deleteRedis(callback){
-            store.get('service').multi()
-                .del(keys.entityDetail(className, input._id, applicationId))
-                .zrem(keys.entityKey(className, applicationId), input._id)
-                .exec(callback);
+        function deleteEntityToRedis(callback){
+            store.get('service').del(keys.entityDetail(className, input._id, applicationId), callback, shardKey);
+        },
+        function deleteEntityToRedis(callback) {
+            store.get('public').zrem(keys.entityKey(className, applicationId), input._id, callback);
         }
     ], function done(error, results) {
         callback(error, results);
@@ -103,35 +112,46 @@ exports.deleteClass = function(input, callback) {
     var applicationId = input.applicationId;
 
     async.series([
+        function isExistClass(callback) {
+            store.get('public').sismember(keys.classesKey(applicationId), className, function(error, result){
+                if( result === 0) {
+                    return callback( errorCode.INVALID_CLASS_NAME, null );
+                }
+
+                callback(null, null);
+            });
+        },
         function deleteMongoDB(callback){
             store.get('mongodb').drop(keys.collectionKey(className, applicationId), callback);
         },
         function deleteRedisEntity(callback){
-            var total = 0;
-            var maxRow = 5000;
-
-            var deleteClass = function() {
-                store.get('service').multi()
-                    .zrange(keys.entityKey(className, applicationId), 0, maxRow-1)
-                    .zremrangebyrank(keys.entityKey(className, applicationId), 0, maxRow-1)
+            (function deleteEntity() {
+                store.get('public').multi()
+                    .zrange(keys.entityKey(className, applicationId), 0, QueryLimit-1)
+                    .zremrangebyrank(keys.entityKey(className, applicationId), 0, QueryLimit-1)
                     .exec(function(error, results) {
-                        var multi = store.get('service').multi();
-                        total += results[1];
+                        var connectionGroup = _getRedisGroupNames();
+                        var shardMulti = [];
+                        for( var i = 0; i < connectionGroup.length; i++) {
+                            shardMulti.push( store.get('service').multi(i) );
+                        }
 
                         for(var i = 0; i < results[0].length; i++) {
-                            multi.del(keys.entityDetail(className, results[0][i], applicationId))
+                            var entityId = results[0][i];
+                            shardMulti[_getShardKey(entityId)].del(keys.entityDetail(className, entityId, applicationId))
                         }
-                        multi.exec(function (error, result) {
-                            if( results[1] === maxRow ) {
-                                return process.nextTick(deleteClass);
-                            }
 
-                            return callback( null, total );
+                        async.times(connectionGroup.length, function(n, next) {
+                            shardMulti[n].exec(next);
+                        },function done(error, r) {
+                            if( results[1] === QueryLimit ) {
+                                return deleteEntity();
+                            } else {
+                                return callback( error );
+                            }
                         });
                     });
-            };
-            process.nextTick(deleteClass);
-
+            })();
         }, function deleteClass(callback) {
             store.get('public').srem(keys.classesKey(applicationId), className, callback);
         }, function deleteKetSet(callback) {
@@ -140,12 +160,11 @@ exports.deleteClass = function(input, callback) {
     ], function done(error, results) {
         callback(error, results);
     });
-}
+};
 
 exports.deleteColumn = function(input, callback) {
     var className = input.class;
     var applicationId = input.applicationId;
-
     async.series([
         function delteMongoDB(callback){
             var column = {};
@@ -161,36 +180,34 @@ exports.deleteColumn = function(input, callback) {
             });
         },
         function deleteRedis(callback){
-            var total = 0;
+            (function deleteColumn(start, end) {
+                store.get('public').zrange(keys.entityKey(className, applicationId), start, end, function(error, result) {
+                    if( error ) { return callback(error, result); }
+                    if( result.length === 0 ) {return callback(error, result); }
 
-            var maxRow = 5000;
-            var count = 0;
+                    var connectionGroup = _getRedisGroupNames();
+                    var shardMulti = [];
 
-            var deleteColumn = function() {
-                var start = maxRow * count;
-                var end =  ((maxRow*(count+1))-1);
-                store.get('service').zrange(keys.entityKey(className, applicationId), start, end, function(error, results) {
-                    if( results.length === 0) { return callback(error, total); }
-
-                    var multi = store.get('service').multi();
-                    total += results.length;
-
-                    for( var i = 0; i < results.length; i++ ) {
-                        multi.hdel(keys.entityDetail(className, results[i], applicationId), input.column);
+                    for( var i = 0; i < connectionGroup.length; i++) {
+                        shardMulti.push( store.get('service').multi(i) );
                     }
-                    
-                    multi.exec(function(error, result) {
-                        if( results.length < maxRow ) {
-                          return callback(error, total);
-                        }
 
-                        count++;
-                        return process.nextTick(deleteColumn);
+                    for(var i = 0; i < result.length; i++) {
+                        var entityId = result[i];
+                        shardMulti[_getShardKey(entityId)].hdel(keys.entityDetail(className, entityId, applicationId), input.column);
+                    }
+
+                    async.times(connectionGroup.length, function(n, next) {
+                        shardMulti[n].exec(next);
+                    },function done(error, r) {
+                        if( result.length === QueryLimit ) {
+                            return deleteColumn(end+1, end + QueryLimit );
+                        } else {
+                            return callback( error );
+                        }
                     });
                 });
-            };
-
-            process.nextTick(deleteColumn);
+            })(0, QueryLimit-1);
         }
     ], function done(error, results) {
         callback(error, results[0]);
@@ -200,13 +217,14 @@ exports.deleteColumn = function(input, callback) {
 exports.deleteField = function(input, callback) {
     var className = input.class;
     var applicationId = input.applicationId;
+    var shardKey = _getShardKey(input._id);
 
     async.series([
         function isExist(callback) {
             store.get('service').hget( keys.entityDetail(className, input._id, applicationId), '_id', function(error, results) {
                 if(results == null) { return callback(errorCode.MISSING_ENTITY_ID, results); }
                 callback(error, results);
-            });
+            }, shardKey);
         },
         function deleteMongoDB(callback){
             var column = {};
@@ -220,20 +238,21 @@ exports.deleteField = function(input, callback) {
                 {$unset:column, $set:{updatedAt: input.timestamp}},
                 {multi: false},
                 function(error, results) {
-                    console.log(error, results);
-
                     callback(error, results);
                 });
         },
         function deleteRedis(callback){
             var key = keys.entityDetail(className,  input._id, applicationId);
-            var multi = store.get('service').multi();
+            var multi = store.get('service').multi(shardKey);
 
             for(var i = 0; i < input.fields.length; i++) {
                 multi.hdel(key, input.fields[i]);
             }
             multi.hset(key, 'updatedAt', input.timestamp);
             multi.exec(callback);
+        },
+        function updateEntityIdToPublic(callback) {
+            store.get('public').zadd(keys.entityKey(className, applicationId), input.timestamp, input._id, callback);
         }
     ], function done(error, results) {
         callback(error, results);
@@ -242,81 +261,79 @@ exports.deleteField = function(input, callback) {
 };
 
 
-//var total = 0;
-//var maxRow = 5000;
-//
-//var deleteClass = function() {
-//    store.get('service').multi()
-//        .zrange(keys.entityKey(className, applicationId), 0, maxRow-1)
-//        .zremrangebyrank(keys.entityKey(className, applicationId), 0, maxRow-1)
-//        .exec(function(error, results) {
-//            var multi = store.get('service').multi();
-//            total += results[1];
-//
-//            for(var i = 0; i < results[0].length; i++) {
-//                multi.del(keys.entityDetail(className, results[0][i], applicationId))
-//            }
-//            multi.exec(function (error, result) {
-//                if( results[1] === maxRow ) {
-//                    return process.nextTick(deleteClass);
-//                }
-//
-//                return callback( null, total );
-//            });
-//        });
-//};
-//
-//process.nextTick(deleteClass);
-
 exports.deleteQuery = function(input, callback) {
     var className = input.class;
     var applicationId = input.applicationId;
-
-    var idList = [];
-    var entityKeyList = [];
-
-    var deleteIdMulti;
-    var deleteEntityMulti;
+    var classCollection = keys.collectionKey(className, applicationId);
+    var condition = input.where;
 
     async.series([
-        function doQuery(callback) {
-            store.get('mongodb').find(keys.collectionKey(className, applicationId), input.where, function(error, results) {
-                if( error ) { return callback(error, results); }
+        function deleteRedis(callback) {
+            store.get('mongodb').findCount(classCollection, condition, function(error, rowCount) {
+                if( error ) { return callback(error, rowCount); }
+                if( rowCount === 0 ) { return callback(error, rowCount); }
 
-                if(results.length > 0) {
-                    deleteIdMulti = store.get('service').multi();
-                    deleteEntityMulti = store.get('service').multi();
-                }
+                var connectionGroup = _getRedisGroupNames();
+                var times = Math.ceil(rowCount / QueryLimit);
+                async.times(times, function(n, next) {
+                    var publicMulti = store.get('public').multi();
+                    var shardMulti = [];
 
-                for(var i = 0; i < results.length; i++ ) {
-                    deleteIdMulti.zrem(keys.entityKey(className, applicationId), results[i]._id);
-                    deleteEntityMulti.del(keys.entityDetail(className, results[i]._id, applicationId));
-                }
+                    for( var i = 0; i < connectionGroup.length; i++) {
+                        shardMulti.push( store.get('service').multi(i) );
+                    }
 
-                callback(error, null);
+                    store.get('mongodb').pagination(classCollection, condition, { pageSize: QueryLimit, pageNumber: n+1}, function(error, results) {
+                        if( error ) { return next(error); }
+
+                        for(var i = 0; i < results.length; i++ ) {
+                            var shardKey = _getShardKey(results[i]._id);
+
+                            publicMulti.zrem(keys.entityKey(className, applicationId), results[i]._id);
+                            shardMulti[shardKey].del(keys.entityDetail(className, results[i]._id, applicationId));
+                        }
+
+                        publicMulti.exec();
+                        for( var i = 0; i < connectionGroup.length; i++) {
+                            shardMulti[i].exec();
+                        }
+
+                        next(error);
+                    });
+                },function done(error, results) {
+                    return callback(error, results);
+                });
             });
         },
-        function deleteDB(callback){
-            if( !deleteIdMulti || !deleteEntityMulti ) { return callback(null, null); }
-
-            async.parallel([
-                function deleteMongoDb(callback) {
-                    store.get('mongodb').remove(keys.collectionKey(className, applicationId), input.where, callback);
-                },
-                function deleteRedisKey(callback) {
-                    deleteIdMulti.exec(callback);
-                },
-                function deleteRedisDetail(callback) {
-                    deleteEntityMulti.exec(callback);
-                }
-            ], function done(error, results) {
-                callback(error, results);
-            });
-        
+        function deleteMongo(callback) {
+            store.get('mongodb').remove(classCollection, condition, callback);
         }
     ], function done(error, results) {
         callback(error, results);
     });
-
 };
 
+function _createEntityId(timestamp, callback) {
+    var shardKey = '0';
+    var redisKey = keys.shardSetKey();
+    if( !timestamp ) {
+        timestamp = Date.now();
+    }
+    store.get('public').zrange(redisKey, 0, 0, function(error, key){
+        if( key.length >= 1 ) {
+            shardKey = key[0];
+            store.get('public').zincrby(redisKey, 1, key[0]);
+        }
+
+        return callback( error, shardKey +uid2(7)+ timestamp + process.pid, shardKey );
+    });
+};
+
+function _getRedisGroupNames() {
+    // TODO ETCD 리스트를 넘기게 수정해야함
+    return ['0', '1'];
+};
+
+function _getShardKey(entityId) {
+    return entityId.substring(0, 1);
+};
