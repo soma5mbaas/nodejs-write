@@ -28,7 +28,7 @@ exports.pushNotification = function(options, notification, callback) {
         function countInstallations(userCount, callback) {
             if( userCount ){
                 // user , installation join query count
-                var times = (userCount / QueryLimit);
+                var times = Math.ceil(userCount / QueryLimit);
 
                 async.times(times, function(n, next) {
                     var page = { pageSize: QueryLimit, pageNumber: n+1};
