@@ -1,5 +1,7 @@
 var keys = require('haru-nodejs-util').keys;
 var store = require('haru-nodejs-store');
+var getShardKey = require('haru-nodejs-util').common.getShardKey;
+
 
 var _ = require('underscore');
 var async = require('async');
@@ -57,7 +59,7 @@ exports.updateEntity = function(input, callback) {
     var className = input.class;
     var applicationId = input.applicationId;
     var entity = input.entity;
-    var shardKey = _getShardKey(input._id);
+    var shardKey = getShardKey(input._id);
 
     async.series([
         function isExistEntity(callback) {
@@ -84,7 +86,7 @@ exports.updateEntity = function(input, callback) {
 exports.deleteEntity = function(input, callback) {
     var className = input.class;
     var applicationId = input.applicationId;
-    var shardKey = _getShardKey(input._id);
+    var shardKey = getShardKey(input._id);
 
     async.series([
         function isExistEntity(callback) {
@@ -138,7 +140,7 @@ exports.deleteClass = function(input, callback) {
 
                         for(var i = 0; i < results[0].length; i++) {
                             var entityId = results[0][i];
-                            shardMulti[_getShardKey(entityId)].del(keys.entityDetail(className, entityId, applicationId))
+                            shardMulti[getShardKey(entityId)].del(keys.entityDetail(className, entityId, applicationId))
                         }
 
                         async.times(connectionGroup.length, function(n, next) {
@@ -194,7 +196,7 @@ exports.deleteColumn = function(input, callback) {
 
                     for(var i = 0; i < result.length; i++) {
                         var entityId = result[i];
-                        shardMulti[_getShardKey(entityId)].hdel(keys.entityDetail(className, entityId, applicationId), input.column);
+                        shardMulti[getShardKey(entityId)].hdel(keys.entityDetail(className, entityId, applicationId), input.column);
                     }
 
                     async.times(connectionGroup.length, function(n, next) {
@@ -217,7 +219,7 @@ exports.deleteColumn = function(input, callback) {
 exports.deleteField = function(input, callback) {
     var className = input.class;
     var applicationId = input.applicationId;
-    var shardKey = _getShardKey(input._id);
+    var shardKey = getShardKey(input._id);
 
     async.series([
         function isExist(callback) {
@@ -287,7 +289,7 @@ exports.deleteQuery = function(input, callback) {
                         if( error ) { return next(error); }
 
                         for(var i = 0; i < results.length; i++ ) {
-                            var shardKey = _getShardKey(results[i]._id);
+                            var shardKey = getShardKey(results[i]._id);
 
                             publicMulti.zrem(keys.entityKey(className, applicationId), results[i]._id);
                             shardMulti[shardKey].del(keys.entityDetail(className, results[i]._id, applicationId));
@@ -334,6 +336,4 @@ function _getRedisGroupNames() {
     return ['0', '1'];
 };
 
-function _getShardKey(entityId) {
-    return entityId.substring(0, 1);
-};
+
