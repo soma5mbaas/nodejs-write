@@ -27,7 +27,6 @@ exports.create = function(req, res) {
 		// create Entity
 
 		input.entity = req.body;
-		input.entity._id = input._id = uuid();
 		input.entity.createdAt = input.entity.updatedAt = input.timestamp;
 
 		entityHandler.createEntity(input, function(error, result) {
@@ -65,7 +64,6 @@ exports.update = function(req, res) {
 	// Entity
 	input.entity = req.body;
 	input.entity.updatedAt = input.timestamp;
-
 
 	entityHandler.updateEntity(input, function(error, result) {
 		if( error ) { return sendError(res, error, log, 'error'); }
@@ -118,7 +116,6 @@ exports.batch = function(req, res) {
 		input.entity = request.entity;
 
 		if( input.method === 'create' ) {
-			input.entity._id = input._id = uuid();
 			input.entity.createdAt = input.entity.updatedAt = input.timestamp;
 
 			var output = {};
@@ -217,3 +214,4 @@ exports.deleteClass = function(req, res) {
         });
     }
 };
+
