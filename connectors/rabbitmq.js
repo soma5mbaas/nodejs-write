@@ -56,6 +56,7 @@ RabbitMQ.prototype.publish = function(qname, data, option, callback) {
                     log.debug('[%d] method : %s', process.pid, strData );
 
                 channel.sendToQueue(qname, new Buffer(strData), option);
+                channel.close();
                 callback( error, null );
             }
         ],
