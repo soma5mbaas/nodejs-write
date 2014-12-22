@@ -72,8 +72,6 @@ exports.pushNotification = function(options, notification, callback) {
                 // installation query count
                 store.get('mongodb').findCount(installationCollection,  options.where.installations, function(error, count) {
                     var times = (count /QueryLimit) + 1;
-                    console.log(times);
-
                     for( var i = 1; i <= times; i++) {
                         var page = { pageSize: QueryLimit, pageNumber: i};
 
