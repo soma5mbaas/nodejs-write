@@ -1,12 +1,13 @@
 var keys = require('haru-nodejs-util').keys;
 var store = require('haru-nodejs-store');
-var getShardKey = require('haru-nodejs-util').common.getShardKey;
 
+var getShardKey = require('haru-nodejs-util').common.getShardKey;
+var createEntityId = require('haru-nodejs-util').common.createEntityId;
 
 var _ = require('underscore');
 var async = require('async');
-var uid2 = require('uid2');
 const QueryLimit = 5000;
+
 
 /**
  * TODO
@@ -20,8 +21,8 @@ exports.createEntity = function(input, callback) {
     var options = {};
 
     async.series([
-        function createEntityId(callback) {
-            _createEntityId(input.timestamp, function(error, id, shardKey) {
+        function createId(callback) {
+            createEntityId({ timestamp:input.timestamp, public: store.get('public') }, function(error, id, shardKey) {
                 input._id = entity._id = id;
                 input.shardKey = shardKey;
 
@@ -315,21 +316,6 @@ exports.deleteQuery = function(input, callback) {
     });
 };
 
-function _createEntityId(timestamp, callback) {
-    var shardKey = '0';
-    var redisKey = keys.shardSetKey();
-    if( !timestamp ) {
-        timestamp = Date.now();
-    }
-    store.get('public').zrange(redisKey, 0, 0, function(error, key){
-        if( key.length >= 1 ) {
-            shardKey = key[0];
-            store.get('public').zincrby(redisKey, 1, key[0]);
-        }
-
-        return callback( error, shardKey +uid2(7)+ timestamp + process.pid, shardKey );
-    });
-};
 
 function _getRedisGroupNames() {
     // TODO ETCD 리스트를 넘기게 수정해야함
