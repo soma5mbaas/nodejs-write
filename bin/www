@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 var cluster = require('cluster');
 var Logger  = require('haru-nodejs-util').Logger;
-var logConfig = require('../logConfig');
-
-
+var logConfig = require('../../logConfig');
 
 // Time Zone
 process.env.TZ = 'Asia/Seoul';
