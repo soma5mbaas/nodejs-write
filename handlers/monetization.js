@@ -8,7 +8,7 @@ var store = require('haru-nodejs-store');
 var _ = require('underscore');
 
 var RabbitMq = require('../connectors/rabbitmq');
-var rabbitmq = new RabbitMq({monetization: require('../config').mqueue.monetization});
+var rabbitmq = new RabbitMq({monetization: config.mqueue.monetization});
 
 exports.create = function(input, callback) {
     rabbitmq.publish('monetization', input);

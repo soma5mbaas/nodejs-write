@@ -9,7 +9,7 @@ var UsersClass = 'Users';
 var QueryLimit = 10000;
 
 var RabbitMq = require('../connectors/rabbitmq');
-var rabbitmq = new RabbitMq({push: require('../config').mqueue.push});
+var rabbitmq = new RabbitMq({push: config.mqueue.push});
 
 exports.pushNotification = function(options, notification, callback) {
     var userCollection =  keys.collectionKey(UsersClass, options.applicationId);

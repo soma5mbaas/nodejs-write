@@ -2,9 +2,9 @@ var _ = require('underscore');
 var async = require('async');
 
 var RabbitMq = require('../connectors/rabbitmq');
-var rabbitmq = new RabbitMq({crawler: require('../config').mqueue.crawler});
+var rabbitmq = new RabbitMq({crawler: config.mqueue.crawler});
 
-var crawlerConfig = require('../config').crawlerConfig;
+var crawlerConfig = config.crawlerConfig;
 
 exports.fetch = function(input, callback) {
     var options = input.options;

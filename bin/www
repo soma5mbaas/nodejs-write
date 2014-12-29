@@ -2,8 +2,20 @@
 var cluster = require('cluster');
 var Logger  = require('haru-nodejs-util').Logger;
 var logConfig = require('../logConfig');
-var config = require('../config');
 
+
+
+// Time Zone
+process.env.TZ = 'Asia/Seoul';
+
+// Global Config
+global.config = _getConfig();
+
+// Global Error Code
+global.errorCode = require('haru-nodejs-util').errorCode;
+
+// set logger
+global.log  = new Logger( __dirname +'/../logs/debug.log', logConfig[config.namespace]);
 
 /**
  * Set Name Space
@@ -11,17 +23,6 @@ var config = require('../config');
  * **/
 require('haru-nodejs-util').keys.setNameSpace(config.namespace);
 
-// Time Zone
-process.env.TZ = 'Asia/Seoul';
-
-// Global Config
-global.config = config;
-
-// Global Error Code
-global.errorCode = require('haru-nodejs-util').errorCode;
-
-// set logger
-global.log  = new Logger( __dirname +'/../logs/debug.log', logConfig[config.namespace]);
 
 // // Exception
 process.on('uncaughtException', function(error) {
@@ -52,3 +53,14 @@ if( cluster.isMaster ) {
 	});
 
 }
+
+function _getConfig() {
+	var globalConfig = require('../../config.json');
+	var appName = require('../package.json').name;
+	var config = globalConfig[globalConfig.namespace];
+
+	config.port = globalConfig[appName].port;
+	config.namespace = globalConfig.namespace
+
+	return config;
+};

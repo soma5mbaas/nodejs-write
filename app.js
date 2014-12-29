@@ -9,8 +9,6 @@ var cors = require('cors');
 var store = require('haru-nodejs-store');
 var analysis = require('haru-nodejs-analysis');
 
-var config = require('./config');
-
 var app = express();
 
 app.use(bodyParser.json());
