@@ -177,7 +177,7 @@ exports.batch = function(req, res) {
 			next(null, {success: false});
 		}
 	}, function done(error, outputs) {
-		res.json( outputs );
+		res.json( { results : outputs } );
 	});
 };
 
