@@ -64,6 +64,7 @@ exports.update = function(req, res) {
 	// Entity
 	input.entity = req.body;
 	input.entity.updatedAt = input.timestamp;
+    delete input.entity.id;
 
 	entityHandler.updateEntity(input, function(error, result) {
 		if( error ) { return sendError(res, error, log, 'error'); }
@@ -71,7 +72,7 @@ exports.update = function(req, res) {
 		schemaHandler.updateSchema(input);
 
 		var output = {};
-		output._id = input.entity._id;
+		output._id = input._id;
 		output.updatedAt = input.entity.updatedAt;
 
 		res.json(output);
